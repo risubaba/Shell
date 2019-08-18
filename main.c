@@ -49,20 +49,77 @@ void executeInBuiltCommand(){
 	// printf("%s",inp);
 	char curCommand[INP_MAX];
 	for (int i=0,k=0;i<=strlen(inp);i++){
-		if (inp[i]!=';' && i<strlen(inp))
+		if (inp[i]!=';' && i<strlen(inp) && inp[i]!='\0')
 			curCommand[k++]=inp[i];
 		else {
 			// adjust for blank spaces at start
-			if (curCommand[0]=='c' && curCommand[1]=='d'){
-				printf("cd\n");
-			} else if (curCommand[0]=='p' && curCommand[1]=='w' && curCommand[2]=='d'){
-				printf("pwd\n");
+			curCommand[k]='\0';
+			if (curCommand[k-1]=='\n') curCommand[k-1]='\0';
+			int inOffset=0;
+			while (curCommand[inOffset]==' ') inOffset++;
+			int argsOffset=inOffset;
+			while (curCommand[argsOffset]!=' ' && curCommand[argsOffset]!='\0') argsOffset++;
+			while (curCommand[argsOffset]==' ') argsOffset++;
+			char argsForCommand[INP_MAX];
 
-			} else if (curCommand[0]=='e' && curCommand[1]=='c' && curCommand[2]=='h' && curCommand[3]=='o'){
-				printf("echo\n");
+			for (int j=argsOffset,l=0;j<=k;j++,l++){
+				argsForCommand[l]=curCommand[j];
+			}
+			if (curCommand[0+inOffset]=='c' && curCommand[1+inOffset]=='d'  && (curCommand[2+inOffset]==' ' || curCommand[2+inOffset]=='\0') ){
 
+				if (chdir(argsForCommand)){
+					perror("Error ");
+				}
+
+			} else if (curCommand[0+inOffset]=='p' && curCommand[1+inOffset]=='w' && curCommand[2+inOffset]=='d' && (curCommand[3+inOffset]==' ' || curCommand[3+inOffset]=='\0')){
+
+				if (k-argsOffset!=1){
+					printf("Too many arguments\n");
+
+				}
+				else if (getcwd(cwd,PATH_MAX)!=NULL){
+					printf("%s\n",cwd);
+				}
+
+			} else if (curCommand[0+inOffset]=='e' && curCommand[1+inOffset]=='c' && curCommand[2+inOffset]=='h' && curCommand[3+inOffset]=='o' && (curCommand[4+inOffset]==' ' || curCommand[4+inOffset]=='\0')){
+
+				// for (int j=0;j<strlen(argsForCommand);j++){
+					// if (argsForCommand[j])
+				// }
+				if (argsForCommand[0]=='\"'){
+
+					for (int j=1;j<strlen(argsForCommand);j++){
+						if (argsForCommand[j]!='\"')
+							printf("%c",argsForCommand[j]);
+						else{
+							printf("\n");
+							break;
+						}
+					}
+
+				} else if (argsForCommand[0]=='\''){
+					for (int j=1;j<strlen(argsForCommand);j++){
+						if (argsForCommand[j]!='\'')
+								printf("%c",argsForCommand[j]);
+						else{
+							printf("\n");
+							break;
+						}
+					}
+				} else {
+					for (int j=0;j<strlen(argsForCommand);j++){
+						if (argsForCommand[j]!=' ')
+								printf("%c",argsForCommand[j]);
+							else{
+								printf("\n");
+								break;
+							}
+					}
+					if (argsForCommand[strlen(argsForCommand)-1]!=' ')
+						printf("\n");
+
+				}
 			} else {
-
 			}
 			k=0;
 		}
