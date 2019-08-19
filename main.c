@@ -15,7 +15,6 @@ char inp[INP_MAX];
 //set error messages wherever required
 //use strcmp in executeInBuiltCommand
 
-
 char* directorySet(char* cwd,char* swd){
 
 	for (int i=0,k=0;i<PATH_MAX;i++){
@@ -130,8 +129,12 @@ void executeInBuiltCommand(){
 				argsForCommand[l]=curCommand[j];
 			}
 			if (curCommand[0+inOffset]=='c' && curCommand[1+inOffset]=='d'  && (curCommand[2+inOffset]==' ' || curCommand[2+inOffset]=='\0') ){
-
-				if (chdir(argsForCommand)){
+				if (!strcmp("~",argsForCommand)){
+					if (chdir(swd)){
+						perror("Error ");
+					}
+				}
+				else if (chdir(argsForCommand)){
 					perror("Error ");
 				}
 
