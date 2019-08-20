@@ -115,7 +115,6 @@ void executeInBuiltCommand(){
 		if (inp[i]!=';' && i<strlen(inp) && inp[i]!='\0')
 			curCommand[k++]=inp[i];
 		else {
-			// adjust for blank spaces at start
 			curCommand[k]='\0';
 			if (curCommand[k-1]=='\n') curCommand[k-1]='\0';
 			int inOffset=0;
