@@ -167,7 +167,21 @@ int parseArgsForCommand(char* argsForCommand,char argvs[100][100]){
 	return k;
 }
 
+char* adjustForTilda(char* argsForCommand){
+	int n=strlen(argsForCommand);
+	if (argsForCommand[0]!='~')
+		return argsForCommand;
+	else {
+		char* ret;
+		strcpy(ret,swd);
+		strcat(ret,"/");	
+		strcat(ret,argsForCommand+2);
+		return ret;
+	}
+}
+
 void cd(char* argsForCommand){
+	argsForCommand = adjustForTilda(argsForCommand);
 	if (!strcmp("~",argsForCommand) || !strcmp("",argsForCommand)){
 		if (chdir(swd)){
 			perror("Error ");
@@ -256,7 +270,6 @@ void executeInBuiltCommand(){
 	}
 
 }
-
 
 int main(){
 	getcwd(swd,PATH_MAX);
