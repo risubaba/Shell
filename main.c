@@ -54,23 +54,12 @@ void printSystemName(){
 
 }
 
-int setlsFlag(char* argsForCommand){
-	char arggs[10][10];
-	int k=0,j=0;
-	for (int i=0;i<strlen(argsForCommand);i++){
-		if (argsForCommand[i]!=' '){
-			arggs[k][j]=argsForCommand[i],j++;
-		} else {
-			arggs[k][j]='\0',k++,j=0;
-		}
-	}
-	arggs[k][j]='\0';
-	k++;
+int setlsFlag(char argvs[100][100],int argc){
 	int ret=-1;
 	char lsValues[][10]={"","-l","-a","-al","-la"};
-	for (int i=0;i<k;i++){
+	for (int i=0;i<argc;i++){
 		for (int j=0;j<5;j++){
-			if (!strcmp(arggs[i],lsValues[j])){
+			if (!strcmp(argvs[i],lsValues[j])){
 				if ((ret==1 && j==2) || (ret==2 && j==1)){
 					ret=4;
 					break;
@@ -114,43 +103,124 @@ void lsPrint(char* name){
     printf("%s\n",name);
 }
 
-void executeCommand(char* curCommand,char* argsForCommand){
-	if (!strcmp(curCommand,"ls ") || !strcmp(curCommand,"ls")){
-		int lsFlag=setlsFlag(argsForCommand);
-		char dirname[100];
-		DIR*p;
-		struct dirent *d;
-		if (lsFlag==-1)
-			strcpy(dirname,argsForCommand);
-		else
-			strcpy(dirname,".");
-		p=opendir(dirname);
-		if(p==NULL){
-		  perror("Cannot find directory");
-		} else {
-			
-			while(d=readdir(p)){
-				if (lsFlag==0){
-					if (d->d_name[0]!='.')
-					printf("%s %d\n",d->d_name,(d->d_type==DT_DIR));
-				}
-				else if (lsFlag==1){
-					if (d->d_name[0]!='.')
-						lsPrint(d->d_name);
-				} else if (lsFlag==2){
-					printf("%s %d\n",d->d_name,(d->d_type==DT_DIR));
-				} else if (lsFlag>2) {
+void ls(char argvs[100][100],int argc){
+	int lsFlag=setlsFlag(argvs,argc);
+	char dirname[100];
+	DIR*p;
+	struct dirent *d;
+	if (lsFlag==-1)
+		strcpy(dirname,argvs[0]);
+	else
+		strcpy(dirname,".");
+	p=opendir(dirname);
+	if(p==NULL){
+		perror("Cannot find directory");
+	} else {	
+		while(d=readdir(p)){
+			if (lsFlag==0){
+				if (d->d_name[0]!='.')
+				printf("%s\n",d->d_name);
+			}
+			else if (lsFlag==1){
+				if (d->d_name[0]!='.')
 					lsPrint(d->d_name);
-				} else if (lsFlag < 0) {
-					if (d->d_name[0]!='.')
-						printf("%s %d\n",d->d_name,(d->d_type==DT_DIR));
-				}
-
+			} else if (lsFlag==2){
+				printf("%s\n",d->d_name);
+			} else if (lsFlag>2) {
+				lsPrint(d->d_name);
+			} else if (lsFlag < 0) {
+				if (d->d_name[0]!='.')
+					printf("%s\n",d->d_name);
 			}
 		}
-  	} else {
-		  printf("reeeeeee\n");	
-	  }
+	}
+}
+
+int parseInput(char* curCommand,char* argsForCommand){
+	int inOffset=0,k=strlen(curCommand);
+
+	while (curCommand[inOffset]==' ') inOffset++;
+	int argsOffset=inOffset;
+	while (curCommand[argsOffset]!=' ' && curCommand[argsOffset]!='\0') argsOffset++;
+	curCommand[argsOffset++]='\0';
+	while (curCommand[argsOffset]==' ') argsOffset++;
+	int l=0;
+	for (int j=argsOffset;j<=k;j++,l++){
+		argsForCommand[l]=curCommand[j];
+	}
+	argsForCommand[l]='\0';
+
+	return inOffset;
+}
+
+int parseArgsForCommand(char* argsForCommand,char argvs[100][100]){
+	int k=0,j=0;
+	for (int i=0;i<strlen(argsForCommand);i++){
+		if (argsForCommand[i]!=' '){
+			argvs[k][j]=argsForCommand[i],j++;
+		} else {
+			argvs[k][j]='\0',k++,j=0;
+		}
+	}
+	argvs[k][j]='\0';
+	k++;
+	return k;
+}
+
+void cd(char* argsForCommand){
+	if (!strcmp("~",argsForCommand) || !strcmp("",argsForCommand)){
+		if (chdir(swd)){
+			perror("Error ");
+		}
+	}
+	else if (chdir(argsForCommand)){
+		perror("Error ");
+	}
+}
+
+void pwd(char argvs[100][100]){
+	printf("%s",argvs[0]);
+	if (strcmp(argvs[0],"")){
+		printf("Too many arguments\n");
+	}
+	else if (getcwd(cwd,PATH_MAX)!=NULL){
+		printf("%s\n",cwd);
+	}
+}
+
+void echo(char* argsForCommand){
+	if (argsForCommand[0]=='\"'){
+		for (int j=1;j<strlen(argsForCommand);j++){
+			if (argsForCommand[j]!='\"')
+				printf("%c",argsForCommand[j]);
+			else{
+				printf("\n");
+				break;
+			}
+		}
+
+	} else if (argsForCommand[0]=='\''){
+		for (int j=1;j<strlen(argsForCommand);j++){
+			if (argsForCommand[j]!='\'')
+					printf("%c",argsForCommand[j]);
+			else{
+				printf("\n");
+				break;
+			}
+		}
+	} else {
+		for (int j=0;j<strlen(argsForCommand);j++){
+			if (argsForCommand[j]!=' ')
+					printf("%c",argsForCommand[j]);
+				else{
+					printf("\n");
+					break;
+				}
+		}
+		if (argsForCommand[strlen(argsForCommand)-1]!=' ')
+			printf("\n");
+
+	}
 }
 
 void executeInBuiltCommand(){
@@ -162,75 +232,24 @@ void executeInBuiltCommand(){
 		else {
 			curCommand[k]='\0';
 			if (curCommand[k-1]=='\n') curCommand[k-1]='\0';
-			int inOffset=0;
-			while (curCommand[inOffset]==' ') inOffset++;
-			int argsOffset=inOffset;
-			while (curCommand[argsOffset]!=' ' && curCommand[argsOffset]!='\0') argsOffset++;
-			while (curCommand[argsOffset]==' ') argsOffset++;
-			if (argsOffset<strlen(curCommand))
-				curCommand[argsOffset-1]='\0';
 			char argsForCommand[INP_MAX];
+			int inOffset=parseInput(curCommand,argsForCommand);
+			char argvs[100][100];
+			int argc=parseArgsForCommand(argsForCommand,argvs);
+			if (!strcmp(curCommand+inOffset,"cd")){
+				cd(argvs[0]);
 
-			for (int j=argsOffset,l=0;j<=k;j++,l++){
-				argsForCommand[l]=curCommand[j];
-			}
-			if (curCommand[0+inOffset]=='c' && curCommand[1+inOffset]=='d'  && (curCommand[2+inOffset]==' ' || curCommand[2+inOffset]=='\0') ){
-				if (!strcmp("~",argsForCommand)){
-					if (chdir(swd)){
-						perror("Error ");
-					}
-				}
-				else if (chdir(argsForCommand)){
-					perror("Error ");
-				}
+			} else if (!strcmp(curCommand+inOffset,"pwd")){
+				pwd(argvs);
 
-			} else if (curCommand[0+inOffset]=='p' && curCommand[1+inOffset]=='w' && curCommand[2+inOffset]=='d' && (curCommand[3+inOffset]==' ' || curCommand[3+inOffset]=='\0')){
+			} else if (!strcmp(curCommand+inOffset,"echo")){
 
-				if (k-argsOffset!=1){
-					printf("Too many arguments\n");
-
-				}
-				else if (getcwd(cwd,PATH_MAX)!=NULL){
-					printf("%s\n",cwd);
-				}
-
-			} else if (curCommand[0+inOffset]=='e' && curCommand[1+inOffset]=='c' && curCommand[2+inOffset]=='h' && curCommand[3+inOffset]=='o' && (curCommand[4+inOffset]==' ' || curCommand[4+inOffset]=='\0')){
-
-				if (argsForCommand[0]=='\"'){
-
-					for (int j=1;j<strlen(argsForCommand);j++){
-						if (argsForCommand[j]!='\"')
-							printf("%c",argsForCommand[j]);
-						else{
-							printf("\n");
-							break;
-						}
-					}
-
-				} else if (argsForCommand[0]=='\''){
-					for (int j=1;j<strlen(argsForCommand);j++){
-						if (argsForCommand[j]!='\'')
-								printf("%c",argsForCommand[j]);
-						else{
-							printf("\n");
-							break;
-						}
-					}
-				} else {
-					for (int j=0;j<strlen(argsForCommand);j++){
-						if (argsForCommand[j]!=' ')
-								printf("%c",argsForCommand[j]);
-							else{
-								printf("\n");
-								break;
-							}
-					}
-					if (argsForCommand[strlen(argsForCommand)-1]!=' ')
-						printf("\n");
-
-				}
+				echo(argsForCommand);
+				
+			} else if (!strcmp(curCommand+inOffset,"ls")){
+				ls(argvs,argc);
 			} else {
-				executeCommand(curCommand,argsForCommand);
+				printf("rereee\n");
 			}
 			k=0;
 		}
@@ -247,4 +266,5 @@ int main(){
 		fgets(inp,INP_MAX,stdin);
 		executeInBuiltCommand();	
 	}
+
 }
