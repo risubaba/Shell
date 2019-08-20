@@ -70,8 +70,14 @@ int setlsFlag(char* argsForCommand){
 	char lsValues[][10]={"","-l","-a","-al","-la"};
 	for (int i=0;i<k;i++){
 		for (int j=0;j<5;j++){
-			if (!strcmp(arggs[i],lsValues[j]))
-				ret=j;
+			if (!strcmp(arggs[i],lsValues[j])){
+				if ((ret==1 && j==2) || (ret==2 && j==1)){
+					ret=4;
+					break;
+				}
+				else
+					ret=j;
+			}
 		}
 	}
 	return ret;
