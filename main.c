@@ -9,6 +9,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
+#include <fcntl.h>
 
 #define INP_MAX 100
 
@@ -18,7 +19,8 @@ char ret[PATH_MAX];
 char inp[INP_MAX];
 
 //set error messages wherever required
-//use strcmp in executeInBuiltCommand
+//add colour to printf
+//add exit message for ^D
 
 char* directorySet(char* cwd,char* swd){
 
@@ -156,14 +158,16 @@ int parseInput(char* curCommand,char* argsForCommand){
 int parseArgsForCommand(char* argsForCommand,char argvs[100][100]){
 	int k=0,j=0;
 	for (int i=0;i<strlen(argsForCommand);i++){
-		if (argsForCommand[i]!=' '){
+		if (argsForCommand[i]!=' ' || argsForCommand[i]=='\0'){
 			argvs[k][j]=argsForCommand[i],j++;
 		} else {
 			argvs[k][j]='\0',k++,j=0;
 		}
 	}
 	argvs[k][j]='\0';
-	k++;
+	if (k || j)
+		k++;
+	argvs[k][0] = '\0';
 	return k;
 }
 
@@ -237,6 +241,80 @@ void echo(char* argsForCommand){
 	}
 }
 
+
+
+int to_int(char* num){
+	int ret = 0;
+	for (int i=0;i<strlen(num);i++)
+		ret = ret * 10 + num[i]-'0';
+	return ret;
+}
+
+void printPinfoLocation(pid_t pid){
+
+	char buff[100];
+	char path[32];
+	sprintf(path, "/proc/%d/exe", pid);
+	readlink(path,buff,100);	
+	char *location ;
+	location = directorySet(buff,swd);
+	for (int i=strlen(location)-1;i>-1;i--)
+		if (location[i]>'z' || location[i]<'A'){
+			if (location[i]!='~' && location[i]!='/' && location[i]!='.'){
+				location[i]='\0';
+				break;
+			}
+		}
+	printf("Executable Path -- %s\n",location);
+
+}
+
+void printPinfoState(pid_t pid){
+
+	char* buff;
+	size_t buffsize = 0;
+	char path[32];
+	sprintf(path, "/proc/%d/status", pid);
+	FILE* fd = fopen(path,"r");
+	for (int i=0;i<3;i++)
+		getline(&buff,&buffsize,fd);
+	printf("Process Status -- %c\n",buff[7]);
+
+}
+
+int checkPid(pid_t pid){
+	char path[32];
+	sprintf(path, "/proc/%d/status", pid);
+	int fd = open(path,O_RDONLY);
+	if (fd == -1 )
+		return 0;
+	return 1;
+}
+
+void pinfo(char argvs[100][100],int argc){
+	pid_t pid;
+	if (argc==0)
+		pid = getpid();
+	else 
+		pid = to_int(argvs[0]);	
+	
+	if (!checkPid(pid))
+		return;
+	printf("pid -- %d\n",pid);
+	printPinfoState(pid);
+	printPinfoLocation(pid);
+}
+
+void executeCommand(char* curCommand,char argvs[100][100],int argc){
+	printf("%s\n\n",curCommand);
+	for (int i=0;i<argc;i++)
+		if (argvs[i][0]=='\0')
+			printf("lylli\n");
+		else
+			printf("%s\n",argvs[i]);
+
+}
+
 void executeInBuiltCommand(){
 
 	char curCommand[INP_MAX];
@@ -252,18 +330,16 @@ void executeInBuiltCommand(){
 			int argc=parseArgsForCommand(argsForCommand,argvs);
 			if (!strcmp(curCommand+inOffset,"cd")){
 				cd(argvs[0]);
-
 			} else if (!strcmp(curCommand+inOffset,"pwd")){
 				pwd(argvs);
-
 			} else if (!strcmp(curCommand+inOffset,"echo")){
-
 				echo(argsForCommand);
-				
 			} else if (!strcmp(curCommand+inOffset,"ls")){
 				ls(argvs,argc);
+			} else if (!strcmp(curCommand+inOffset,"pinfo")){
+				pinfo(argvs,argc);
 			} else {
-				printf("rereee\n");
+				executeCommand(curCommand,argvs,argc);
 			}
 			k=0;
 		}
@@ -276,6 +352,7 @@ int main(){
 
 	while (1){
 		printSystemName();
+		// printf("\n%s\n",swd);
 		fgets(inp,INP_MAX,stdin);
 		executeInBuiltCommand();	
 	}
