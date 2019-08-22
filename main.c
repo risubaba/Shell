@@ -11,6 +11,8 @@
 #include <grp.h>
 #include <time.h>
 #include <fcntl.h>
+#include <readline/history.h>
+#include <readline/readline.h>
 
 #define INP_MAX 100
 #define PATH_MAX 4096
@@ -24,7 +26,8 @@ char inp[INP_MAX];
 //add colour to printf
 //add <usage> to error messages
 //add exit message for ^D
-//try to adjust for ls ~/child
+//try to adjust for ls -l ~/child (Wrong permissions)
+//add history size
 
 char *directorySet(char *cwd, char *swd)
 {
@@ -64,123 +67,149 @@ void printSystemName()
 	}
 }
 
-int setlsFlag(char argvs[1024][1024],int argc){
-	int ret=-1;
-	char lsValues[][10]={"","-l","-a","-al","-la"};
-	for (int i=0;i<argc;i++){
-		for (int j=0;j<5;j++){
-			if (!strcmp(argvs[i],lsValues[j])){
-				if ((ret==1 && j==2) || (ret==2 && j==1)){
-					ret=4;
+int setlsFlag(char argvs[1024][1024], int argc)
+{
+	int ret = -1;
+	char lsValues[][10] = {"", "-l", "-a", "-al", "-la"};
+	for (int i = 0; i < argc; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			if (!strcmp(argvs[i], lsValues[j]))
+			{
+				if ((ret == 1 && j == 2) || (ret == 2 && j == 1))
+				{
+					ret = 4;
 					break;
 				}
 				else
-					ret=j;
+					ret = j;
 			}
 		}
 	}
 	return ret;
 }
 
-void lsPrint(char* name){
+void lsPrint(char *name)
+{
 	struct passwd *pw;
 	struct group *gp;
 	struct stat sb;
 
-	stat(name,&sb);
+	stat(name, &sb);
 
-	printf( (S_ISDIR(sb.st_mode))  ? "d" : "-");
-    printf( (sb.st_mode & S_IRUSR) ? "r" : "-");
-    printf( (sb.st_mode & S_IWUSR) ? "w" : "-");
-    printf( (sb.st_mode & S_IXUSR) ? "x" : "-");
-    printf( (sb.st_mode & S_IRGRP) ? "r" : "-");
-    printf( (sb.st_mode & S_IWGRP) ? "w" : "-");
-    printf( (sb.st_mode & S_IXGRP) ? "x" : "-");
-    printf( (sb.st_mode & S_IROTH) ? "r" : "-");
-    printf( (sb.st_mode & S_IWOTH) ? "w" : "-");
-    printf( (sb.st_mode & S_IXOTH) ? "x" : "-");
+	printf((S_ISDIR(sb.st_mode)) ? "d" : "-");
+	printf((sb.st_mode & S_IRUSR) ? "r" : "-");
+	printf((sb.st_mode & S_IWUSR) ? "w" : "-");
+	printf((sb.st_mode & S_IXUSR) ? "x" : "-");
+	printf((sb.st_mode & S_IRGRP) ? "r" : "-");
+	printf((sb.st_mode & S_IWGRP) ? "w" : "-");
+	printf((sb.st_mode & S_IXGRP) ? "x" : "-");
+	printf((sb.st_mode & S_IROTH) ? "r" : "-");
+	printf((sb.st_mode & S_IWOTH) ? "w" : "-");
+	printf((sb.st_mode & S_IXOTH) ? "x" : "-");
 	printf(" ");
-    printf("%ld ",sb.st_nlink);
-    pw=getpwuid(sb.st_uid);
-    printf("%s ",pw->pw_name);
-    gp=getgrgid(sb.st_gid);
-    printf("%s ",gp->gr_name);
-    printf("%5ld ",sb.st_size);
-    char* c=ctime(&sb.st_mtime);
-    for(int i=4;i<=15;i++)
-      printf("%c",c[i]);
-    printf(" ");
-    printf("%s\n",name);
+	printf("%ld ", sb.st_nlink);
+	pw = getpwuid(sb.st_uid);
+	printf("%s ", pw->pw_name);
+	gp = getgrgid(sb.st_gid);
+	printf("%s ", gp->gr_name);
+	printf("%5ld ", sb.st_size);
+	char *c = ctime(&sb.st_mtime);
+	for (int i = 4; i <= 15; i++)
+		printf("%c", c[i]);
+	printf(" ");
+	printf("%s\n", name);
 }
-
 
 void adjustForTilda(char *argsForCommand)
 {
 	int n = strlen(argsForCommand);
-	int len=strlen(argsForCommand);
-	if (argsForCommand[0] != '~'){
-		for (int i=0;i<strlen(argsForCommand);i++)
-			argsForCommand[i+strlen(cwd)+1]=argsForCommand[i];
-		argsForCommand[strlen(cwd)]='/';
-		for (int i=0;i<strlen(cwd);i++)
-			argsForCommand[i]=cwd[i];
-		argsForCommand[strlen(cwd)+len+1]='\0';
+	int len = strlen(argsForCommand);
+	if (argsForCommand[0] != '~')
+	{
+		for (int i = 0; i < strlen(argsForCommand); i++)
+			argsForCommand[i + strlen(cwd) + 1] = argsForCommand[i];
+		argsForCommand[strlen(cwd)] = '/';
+		for (int i = 0; i < strlen(cwd); i++)
+			argsForCommand[i] = cwd[i];
+		argsForCommand[strlen(cwd) + len + 1] = '\0';
 	}
 	else
 	{
-		for (int i=0;i<strlen(argsForCommand);i++){
-			argsForCommand[i+strlen(swd)]=argsForCommand[i+1];
+		for (int i = 0; i < strlen(argsForCommand); i++)
+		{
+			argsForCommand[i + strlen(swd)] = argsForCommand[i + 1];
 		}
 		// argsForCommand[strlen(swd)]='/';
 
-		for (int i=0;i<strlen(swd);i++)
-			argsForCommand[i]=swd[i];
+		for (int i = 0; i < strlen(swd); i++)
+			argsForCommand[i] = swd[i];
 		// argsForCommand[strlen(cwd)+len+1]='\0';
-
 	}
 }
 
-void ls(char argvs[1024][1024],int argc){
-	int lsFlag=setlsFlag(argvs,argc);
+void ls(char argvs[1024][1024], int argc)
+{
+	int lsFlag = setlsFlag(argvs, argc);
 	char dirname[100];
-	DIR*p;
+	DIR *p;
 	struct dirent *d;
 
-	if (lsFlag==-1){
-		if (!strcmp("",argvs[0])){
-			strcpy(dirname,".");
-		} else {
-				adjustForTilda(argvs[0]);
-				strcpy(dirname,argvs[0]);
+	if (lsFlag == -1)
+	{
+		if (!strcmp("", argvs[0]))
+		{
+			strcpy(dirname, ".");
+		}
+		else
+		{
+			adjustForTilda(argvs[0]);
+			strcpy(dirname, argvs[0]);
 		}
 	}
-	else{
-		if (argvs[argc-1][0]!='-'){
-			adjustForTilda(argvs[argc-1]);
-			strcpy(dirname,argvs[argc-1]);
+	else
+	{
+		if (argvs[argc - 1][0] != '-')
+		{
+			adjustForTilda(argvs[argc - 1]);
+			strcpy(dirname, argvs[argc - 1]);
 		}
-		else strcpy(dirname,".");
+		else
+			strcpy(dirname, ".");
 	}
 
-	p=opendir(dirname);
-	if(p==NULL){
+	p = opendir(dirname);
+	if (p == NULL)
+	{
 		perror("Cannot find directory");
-	} else {	
-		while(d=readdir(p)){
-			if (lsFlag==0){
-				if (d->d_name[0]!='.')
-				printf("%s\n",d->d_name);
+	}
+	else
+	{
+		while (d = readdir(p))
+		{
+			if (lsFlag == 0)
+			{
+				if (d->d_name[0] != '.')
+					printf("%s\n", d->d_name);
 			}
-			else if (lsFlag==1){
-				if (d->d_name[0]!='.')
+			else if (lsFlag == 1)
+			{
+				if (d->d_name[0] != '.')
 					lsPrint(d->d_name);
-			} else if (lsFlag==2){
-				printf("%s\n",d->d_name);
-			} else if (lsFlag>2) {
+			}
+			else if (lsFlag == 2)
+			{
+				printf("%s\n", d->d_name);
+			}
+			else if (lsFlag > 2)
+			{
 				lsPrint(d->d_name);
-			} else if (lsFlag < 0) {
-				if (d->d_name[0]!='.')
-					printf("%s\n",d->d_name);
+			}
+			else if (lsFlag < 0)
+			{
+				if (d->d_name[0] != '.')
+					printf("%s\n", d->d_name);
 			}
 		}
 	}
@@ -231,17 +260,20 @@ int parseArgsForCommand(char *argsForCommand, char argvs[1024][1024])
 
 void cd(char *argsForCommand)
 {
-	adjustForTilda(argsForCommand);
-	if (!strcmp("~", argsForCommand) || !strcmp("", argsForCommand))
+	if (!strcmp("", argsForCommand))
 	{
 		if (chdir(swd))
 		{
 			perror("Error ");
 		}
 	}
-	else if (chdir(argsForCommand))
+	else
 	{
-		perror("Error ");
+		adjustForTilda(argsForCommand);
+		if (chdir(argsForCommand))
+		{
+			perror("Error ");
+		}
 	}
 }
 
@@ -455,6 +487,42 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 	}
 }
 
+void history(char argvs[1024][1024], int argc)
+{
+	int len_required = 100;
+	if (argc == 1)
+	{
+		len_required = to_int(argvs[0]);
+	}
+
+	HISTORY_STATE *myhist = history_get_history_state();
+
+	HIST_ENTRY **mylist = history_list();
+
+	int count = myhist->length > len_required ? len_required : myhist->length;
+	for (int i = myhist->length - 1; i > -1 && count > 0; i--)
+	{
+		if (i != myhist->length - 1)
+		{
+			if (strcmp(mylist[i]->line, mylist[i + 1]->line))
+			{
+				printf("%s\n", mylist[i]->line);
+				count--;
+			}
+		}
+		else
+		{
+			printf("%s\n", mylist[i]->line);
+			count--;
+		}
+	}
+	putchar('\n');
+}
+
+void nightswatch(char argvs[1024][1024], int argc)
+{
+}
+
 void executeInBuiltCommand()
 {
 
@@ -492,6 +560,14 @@ void executeInBuiltCommand()
 			{
 				pinfo(argvs, argc);
 			}
+			else if (!strcmp(curCommand + inOffset, "history"))
+			{
+				history(argvs, argc);
+			}
+			else if (!strcmp(curCommand + inOffset, "nightswatch"))
+			{
+				nightswatch(argvs, argc);
+			}
 			else
 			{
 				executeCommand(curCommand, argvs, argc);
@@ -504,11 +580,15 @@ void executeInBuiltCommand()
 int main()
 {
 	getcwd(swd, PATH_MAX);
-
+	using_history();
+	// int fd1 = open("/etc/inputrc",O_APPEND);
+	// write(fd1,"set history-size 20\n",strlen("set history-size 20\n"));
+	// close(fd1);
 	while (1)
 	{
 		printSystemName();
 		fgets(inp, INP_MAX, stdin);
+		add_history(inp);
 		executeInBuiltCommand();
 	}
 }
