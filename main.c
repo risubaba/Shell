@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <readline/history.h>
 #include <readline/readline.h>
+#include <curses.h>
 
 #define INP_MAX 100
 #define PATH_MAX 4096
@@ -28,6 +29,7 @@ char inp[INP_MAX];
 //add exit message for ^D
 //try to adjust for ls -l ~/child (Wrong permissions)
 //add history size
+//if & at the end change argc to argc-1
 
 char *directorySet(char *cwd, char *swd)
 {
@@ -290,7 +292,7 @@ void pwd(char argvs[1024][1024])
 	}
 }
 
-void echo(char *argsForCommand)
+void Echo(char *argsForCommand)
 {
 	if (argsForCommand[0] == '\"')
 	{
@@ -519,8 +521,80 @@ void history(char argvs[1024][1024], int argc)
 	putchar('\n');
 }
 
+void nightswatch_dirty()
+{
+	char *buff;
+	size_t buffsize = 0;
+	char path[32] = "/proc/meminfo\0";
+	FILE *fd = fopen(path, "r");
+	for (int i = 0; i < 17; i++)
+		getline(&buff, &buffsize, fd);
+	printf("%s\n", buff);
+}
+
+void nightswatch_interrupt_setup()
+{
+	char *buff;
+	size_t buffsize = 0;
+	char path[32] = "/proc/interrupts\0";
+	FILE *fd = fopen(path, "r");
+	getline(&buff, &buffsize, fd);
+	printf("%s\n", buff);
+}
+
+void nightswatch_interrupt()
+{
+	char *buff;
+	size_t buffsize = 0;
+	char path[32] = "/proc/interrupts\0";
+	FILE *fd = fopen(path, "r");
+	for (int i = 0; i < 3; i++)
+		getline(&buff, &buffsize, fd);
+	printf("%s\n", buff);
+}
+
 void nightswatch(char argvs[1024][1024], int argc)
 {
+	int ttime = to_int(argvs[1]);
+	if (ttime == 0)
+	{
+		//error handling
+	}
+	int type;
+	if (!strcmp(argvs[2], "interrupt"))
+	{
+		type = 1;
+	}
+	else if (!strcmp(argvs[2], "dirty"))
+	{
+		type = 0;
+	}
+	else
+	{
+		//error handling
+	}
+
+	time_t starttime = time(NULL), prevtime = time(NULL);
+	if (type == 1)
+	{
+		nightswatch_interrupt_setup();
+	}
+	while (1)
+	{
+		time_t curtime = time(NULL);
+		if ((curtime - starttime) % ttime == 0 && curtime != prevtime)
+		{
+			prevtime = curtime;
+			if (!type)
+			{
+				nightswatch_dirty();
+			}
+			else
+			{
+				nightswatch_interrupt();
+			}
+		}
+	}
 }
 
 void executeInBuiltCommand()
@@ -550,7 +624,7 @@ void executeInBuiltCommand()
 			}
 			else if (!strcmp(curCommand + inOffset, "echo"))
 			{
-				echo(argsForCommand);
+				Echo(argsForCommand);
 			}
 			else if (!strcmp(curCommand + inOffset, "ls"))
 			{
