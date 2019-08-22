@@ -13,6 +13,7 @@
 #include <fcntl.h>
 
 #define INP_MAX 100
+#define PATH_MAX 4096
 
 char cwd[PATH_MAX];
 char swd[PATH_MAX];
@@ -63,125 +64,123 @@ void printSystemName()
 	}
 }
 
-int setlsFlag(char argvs[100][100], int argc)
-{
-	int ret = -1;
-	char lsValues[][10] = {"", "-l", "-a", "-al", "-la"};
-	for (int i = 0; i < argc; i++)
-	{
-		for (int j = 0; j < 5; j++)
-		{
-			if (!strcmp(argvs[i], lsValues[j]))
-			{
-				if ((ret == 1 && j == 2) || (ret == 2 && j == 1))
-				{
-					ret = 4;
+int setlsFlag(char argvs[1024][1024],int argc){
+	int ret=-1;
+	char lsValues[][10]={"","-l","-a","-al","-la"};
+	for (int i=0;i<argc;i++){
+		for (int j=0;j<5;j++){
+			if (!strcmp(argvs[i],lsValues[j])){
+				if ((ret==1 && j==2) || (ret==2 && j==1)){
+					ret=4;
 					break;
 				}
 				else
-					ret = j;
+					ret=j;
 			}
 		}
 	}
 	return ret;
 }
 
-void lsPrint(char *name)
-{
+void lsPrint(char* name){
 	struct passwd *pw;
 	struct group *gp;
 	struct stat sb;
 
-	stat(name, &sb);
+	stat(name,&sb);
 
-	printf((S_ISDIR(sb.st_mode)) ? "d" : "-");
-	printf((sb.st_mode & S_IRUSR) ? "r" : "-");
-	printf((sb.st_mode & S_IWUSR) ? "w" : "-");
-	printf((sb.st_mode & S_IXUSR) ? "x" : "-");
-	printf((sb.st_mode & S_IRGRP) ? "r" : "-");
-	printf((sb.st_mode & S_IWGRP) ? "w" : "-");
-	printf((sb.st_mode & S_IXGRP) ? "x" : "-");
-	printf((sb.st_mode & S_IROTH) ? "r" : "-");
-	printf((sb.st_mode & S_IWOTH) ? "w" : "-");
-	printf((sb.st_mode & S_IXOTH) ? "x" : "-");
+	printf( (S_ISDIR(sb.st_mode))  ? "d" : "-");
+    printf( (sb.st_mode & S_IRUSR) ? "r" : "-");
+    printf( (sb.st_mode & S_IWUSR) ? "w" : "-");
+    printf( (sb.st_mode & S_IXUSR) ? "x" : "-");
+    printf( (sb.st_mode & S_IRGRP) ? "r" : "-");
+    printf( (sb.st_mode & S_IWGRP) ? "w" : "-");
+    printf( (sb.st_mode & S_IXGRP) ? "x" : "-");
+    printf( (sb.st_mode & S_IROTH) ? "r" : "-");
+    printf( (sb.st_mode & S_IWOTH) ? "w" : "-");
+    printf( (sb.st_mode & S_IXOTH) ? "x" : "-");
 	printf(" ");
-	printf("%ld ", sb.st_nlink);
-	pw = getpwuid(sb.st_uid);
-	printf("%s ", pw->pw_name);
-	gp = getgrgid(sb.st_gid);
-	printf("%s ", gp->gr_name);
-	printf("%5ld ", sb.st_size);
-	char *c = ctime(&sb.st_mtime);
-	for (int i = 4; i <= 15; i++)
-		printf("%c", c[i]);
-	printf(" ");
-	printf("%s\n", name);
+    printf("%ld ",sb.st_nlink);
+    pw=getpwuid(sb.st_uid);
+    printf("%s ",pw->pw_name);
+    gp=getgrgid(sb.st_gid);
+    printf("%s ",gp->gr_name);
+    printf("%5ld ",sb.st_size);
+    char* c=ctime(&sb.st_mtime);
+    for(int i=4;i<=15;i++)
+      printf("%c",c[i]);
+    printf(" ");
+    printf("%s\n",name);
 }
 
-char *adjustForTilda(char *argsForCommand)
+
+void adjustForTilda(char *argsForCommand)
 {
 	int n = strlen(argsForCommand);
-	if (argsForCommand[0] != '~')
-		return argsForCommand;
+	int len=strlen(argsForCommand);
+	if (argsForCommand[0] != '~'){
+		for (int i=0;i<strlen(argsForCommand);i++)
+			argsForCommand[i+strlen(cwd)+1]=argsForCommand[i];
+		argsForCommand[strlen(cwd)]='/';
+		for (int i=0;i<strlen(cwd);i++)
+			argsForCommand[i]=cwd[i];
+		argsForCommand[strlen(cwd)+len+1]='\0';
+	}
 	else
 	{
-		char *rettt;
-		strcpy(rettt, swd);
-		strcat(rettt, "/");
-		strcat(rettt, argsForCommand + 2);
-		return rettt;
+		for (int i=0;i<strlen(argsForCommand);i++){
+			argsForCommand[i+strlen(swd)]=argsForCommand[i+1];
+		}
+		// argsForCommand[strlen(swd)]='/';
+
+		for (int i=0;i<strlen(swd);i++)
+			argsForCommand[i]=swd[i];
+		// argsForCommand[strlen(cwd)+len+1]='\0';
+
 	}
 }
 
-void ls(char argvs[100][100], int argc)
-{
-	int lsFlag = setlsFlag(argvs, argc);
+void ls(char argvs[1024][1024],int argc){
+	int lsFlag=setlsFlag(argvs,argc);
 	char dirname[100];
-	DIR *p;
+	DIR*p;
 	struct dirent *d;
-	if (lsFlag == -1)
-		if (argvs[0][0] == '~')
-		{
-			char *temp;
-			temp = adjustForTilda(argvs[0]);
-			return;
-			strcpy(dirname, temp);
+
+	if (lsFlag==-1){
+		if (!strcmp("",argvs[0])){
+			strcpy(dirname,".");
+		} else {
+				adjustForTilda(argvs[0]);
+				strcpy(dirname,argvs[0]);
 		}
-		else
-			strcpy(dirname, argvs[0]);
-	else
-		strcpy(dirname, ".");
-	p = opendir(dirname);
-	if (p == NULL)
-	{
-		perror("Cannot find directory");
 	}
-	else
-	{
-		while (d = readdir(p))
-		{
-			if (lsFlag == 0)
-			{
-				if (d->d_name[0] != '.')
-					printf("%s\n", d->d_name);
+	else{
+		if (argvs[argc-1][0]!='-'){
+			adjustForTilda(argvs[argc-1]);
+			strcpy(dirname,argvs[argc-1]);
+		}
+		else strcpy(dirname,".");
+	}
+
+	p=opendir(dirname);
+	if(p==NULL){
+		perror("Cannot find directory");
+	} else {	
+		while(d=readdir(p)){
+			if (lsFlag==0){
+				if (d->d_name[0]!='.')
+				printf("%s\n",d->d_name);
 			}
-			else if (lsFlag == 1)
-			{
-				if (d->d_name[0] != '.')
+			else if (lsFlag==1){
+				if (d->d_name[0]!='.')
 					lsPrint(d->d_name);
-			}
-			else if (lsFlag == 2)
-			{
-				printf("%s\n", d->d_name);
-			}
-			else if (lsFlag > 2)
-			{
+			} else if (lsFlag==2){
+				printf("%s\n",d->d_name);
+			} else if (lsFlag>2) {
 				lsPrint(d->d_name);
-			}
-			else if (lsFlag < 0)
-			{
-				if (d->d_name[0] != '.')
-					printf("%s\n", d->d_name);
+			} else if (lsFlag < 0) {
+				if (d->d_name[0]!='.')
+					printf("%s\n",d->d_name);
 			}
 		}
 	}
@@ -209,7 +208,7 @@ int parseInput(char *curCommand, char *argsForCommand)
 	return inOffset;
 }
 
-int parseArgsForCommand(char *argsForCommand, char argvs[100][100])
+int parseArgsForCommand(char *argsForCommand, char argvs[1024][1024])
 {
 	int k = 0, j = 0;
 	for (int i = 0; i < strlen(argsForCommand); i++)
@@ -232,7 +231,7 @@ int parseArgsForCommand(char *argsForCommand, char argvs[100][100])
 
 void cd(char *argsForCommand)
 {
-	argsForCommand = adjustForTilda(argsForCommand);
+	adjustForTilda(argsForCommand);
 	if (!strcmp("~", argsForCommand) || !strcmp("", argsForCommand))
 	{
 		if (chdir(swd))
@@ -246,7 +245,7 @@ void cd(char *argsForCommand)
 	}
 }
 
-void pwd(char argvs[100][100])
+void pwd(char argvs[1024][1024])
 {
 	printf("%s", argvs[0]);
 	if (strcmp(argvs[0], ""))
@@ -359,7 +358,7 @@ int checkPid(pid_t pid)
 	return 1;
 }
 
-void pinfo(char argvs[100][100], int argc)
+void pinfo(char argvs[1024][1024], int argc)
 {
 	pid_t pid;
 	if (argc == 0)
@@ -379,9 +378,9 @@ void pinfo(char argvs[100][100], int argc)
 	printPinfoLocation(pid);
 }
 
-void executeCommand(char *curCommand, char argvs[100][100], int argc)
+void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 {
-	char *new_argvs[100];
+	char *new_argvs[1024];
 	for (int i = 0; i < argc + 1; i++)
 	{
 		if (!i)
@@ -471,7 +470,7 @@ void executeInBuiltCommand()
 				curCommand[k - 1] = '\0';
 			char argsForCommand[INP_MAX];
 			int inOffset = parseInput(curCommand, argsForCommand);
-			char argvs[100][100];
+			char argvs[1024][1024];
 			int argc = parseArgsForCommand(argsForCommand, argvs);
 			if (!strcmp(curCommand + inOffset, "cd"))
 			{
@@ -509,7 +508,6 @@ int main()
 	while (1)
 	{
 		printSystemName();
-		// printf("\n%s\n",swd);
 		fgets(inp, INP_MAX, stdin);
 		executeInBuiltCommand();
 	}
