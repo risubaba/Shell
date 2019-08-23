@@ -1,7 +1,7 @@
-LDFLAGS=-lncurses -readline
+LDFLAGS=-lncurses
 
-a.out: main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o
-		gcc main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o -o a.out -lncurses -lreadline
+a.out: main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o history
+		gcc main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o -o a.out -lncurses -g
 
 main.o: main.c
 		gcc -c main.c
@@ -21,5 +21,8 @@ builtIn.o: builtIn.h builtIn.c
 executeCommand.o: executeCommand.h executeCommand.c
 	gcc -c executeCommand.c -o executeCommand.o
 
+history: 
+	touch .history
+
 clean:
-		rm -rf main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o a.out
+		rm -rf main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o .history a.out

@@ -1,35 +1,114 @@
 #include "bonus.h"
 
+int initializeHistory()
+{
+    char filepath[1024];
+    strcpy(filepath,swd);
+    strcat(filepath,"/.history");
+    FILE *fd = fopen(filepath, "r+");
+    if (fd == NULL)
+    {
+        printf("Error : History for session won't be saved\n");
+        return 0;
+    }
+    fclose(fd);
+    return 1;
+}
+
+void addHistory(char *inp)
+{
+    char filepath[1024];
+    strcpy(filepath,swd);
+    strcat(filepath,"/.history");
+    FILE *fd = fopen(filepath, "r+");
+    if (fd==NULL){
+        printf("Error : History for session won't be saved\n");
+        return ;
+    }
+    char *buff;
+    size_t buffsize = 0;
+    int lines = 0;
+    for (int i = 0;; i++)
+    {
+        if (getline(&buff, &buffsize, fd) == -1)
+        {
+            lines = i;
+            break;
+        }
+        if (!strcmp("", buff))
+        {
+            lines = i;
+            break;
+        }
+    }
+    if (lines == 20)
+    {
+        fseek(fd, 0, SEEK_SET);
+        char temp[20][1024];
+        for (int i = 0; i < 20; i++)
+        {
+            getline(&buff, &buffsize, fd);
+            if (i)
+                strcpy(temp[i - 1], buff);
+        }
+        lines = 19;
+    }
+    fseek(fd, 0, SEEK_SET);
+    while ((lines)--)
+        getline(&buff, &buffsize, fd);
+    if (strcmp(buff, inp))
+    {
+        fprintf(fd, "%s", inp);
+    }
+    fclose(fd);
+}
+
 void history(char argvs[1024][1024], int argc)
 {
-    int len_required = 100;
+    char* buff;
+    size_t buffsize = 0;
+    int len_required = 10;
     if (argc == 1)
     {
         len_required = to_int(argvs[0]);
     }
 
-    HISTORY_STATE *myhist = history_get_history_state();
-
-    HIST_ENTRY **mylist = history_list();
-
-    int count = myhist->length > len_required ? len_required : myhist->length;
-    for (int i = myhist->length - 1; i > -1 && count > 0; i--)
+    if (len_required > 20)
     {
-        if (i != myhist->length - 1)
+        printf("Max history size is 20\n");
+        return;
+    }
+    int lines = 0;
+    char filepath[1024];
+    strcpy(filepath,swd);
+    strcat(filepath,"/.history");
+    FILE *fd = fopen(filepath, "r+");
+    for (int i = 0;; i++)
+    {
+        if (getline(&buff, &buffsize, fd) == -1)
         {
-            if (strcmp(mylist[i]->line, mylist[i + 1]->line))
-            {
-                printf("%s\n", mylist[i]->line);
-                count--;
-            }
+            lines = i;
+            break;
         }
-        else
+        if (!strcmp("", buff))
         {
-            printf("%s\n", mylist[i]->line);
-            count--;
+            lines = i;
+            break;
         }
     }
-    putchar('\n');
+    fseek(fd, 0, SEEK_SET);
+    char hist[20][1024];
+    for (int i = 0; i < lines; i++)
+    {
+        getline(&buff, &buffsize, fd);
+        strcpy(hist[i], buff);
+    }
+    int count = lines > len_required ? len_required : lines;
+    for (int i = lines; i > -1 && count > -1; i--)
+    {
+        printf("%s",hist[i]);
+        count--;
+    }
 }
 
 void nightswatch_dirty()
@@ -69,7 +148,8 @@ void nightswatch(char argvs[1024][1024], int argc)
     int ttime = to_int(argvs[1]);
     if (ttime == 0)
     {
-        //error handling
+        printf("Time interval has to be a positive number\n");
+        return ;
     }
     int type;
     if (!strcmp(argvs[2], "interrupt"))
@@ -82,7 +162,8 @@ void nightswatch(char argvs[1024][1024], int argc)
     }
     else
     {
-        //error handling
+        printf("Please enter a valid argument\n");
+        return;
     }
 
     time_t starttime = time(NULL), prevtime = time(NULL);

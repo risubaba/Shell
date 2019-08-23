@@ -2,10 +2,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
-#include <readline/history.h>
-#include <readline/readline.h>
+#define INP_MAX 1024
 
 extern int to_int(char* );
+extern char swd[4096];
+extern char inp[INP_MAX];
+int initializeHistory();
+void addHistory(char *);
 void history (char [1024][1024],int);
 void nightswatch_dirty();
 void nightswatch_interrupt_setup();

@@ -37,9 +37,9 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 			}
 			else
 			{
-				int status;
+				int status=0;
 				waitpid(pid_child, &status, 0);
-				if (status == 0)
+				if (!status)
 				{
 					printf("\nCommand %s with pid %d exited normally\n", new_argvs[0], (int)getpid());
 				}
@@ -66,7 +66,7 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 		{
 			int status = 0;
 			waitpid(pid, &status, 0);
-			if (status == 0)
+			if (!status)
 			{
 				printf("\nCommand %s with pid %d exited normally\n", new_argvs[0], (int)pid);
 			}

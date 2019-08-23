@@ -17,7 +17,6 @@ char inp[INP_MAX];
 //add <usage> to error messages
 //add exit message for ^D
 //try to adjust for ls -l ~/child (Wrong permissions)
-//add history size
 
 char *directorySet(char *cwd, char *swd)
 {
@@ -54,13 +53,20 @@ void printSystemName()
 		char *directory;
 		directory = directorySet(cwd, swd);
 		printf("<%s@%s:%s>", uName, sName, directory);
+	} 
+	else
+	{
+		printf("Error getting current working directorty file path\n");
+		return;
 	}
+	
 }
 
 void adjustForTilda(char *argsForCommand)
 {
 	int n = strlen(argsForCommand);
 	int len = strlen(argsForCommand);
+	if (getcwd(cwd,4096)==NULL) printf("Error in updating cwd\n");
 	if (argsForCommand[0] != '~')
 	{
 		for (int i = 0; i < strlen(argsForCommand); i++)
@@ -133,12 +139,12 @@ int to_int(char *num)
 int main()
 {
 	getcwd(swd, PATH_MAX);
-	using_history();
+	int hist=initializeHistory();
 	while (1)
 	{
 		printSystemName();
 		fgets(inp, INP_MAX, stdin);
-		add_history(inp);
+		if (hist) addHistory(inp);
 		executeInBuiltCommand();
 	}
 }
