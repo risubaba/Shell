@@ -1,19 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <limits.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/wait.h>
-#include <pwd.h>
-#include <grp.h>
-#include <time.h>
-#include <fcntl.h>
-#include <readline/history.h>
-#include <readline/readline.h>
 #include <curses.h>
+#include "bonus.h"
+#include "pinfo.h"
+#include "ls.h"
 
 #define INP_MAX 100
 #define PATH_MAX 4096
@@ -69,61 +58,6 @@ void printSystemName()
 	}
 }
 
-int setlsFlag(char argvs[1024][1024], int argc)
-{
-	int ret = -1;
-	char lsValues[][10] = {"", "-l", "-a", "-al", "-la"};
-	for (int i = 0; i < argc; i++)
-	{
-		for (int j = 0; j < 5; j++)
-		{
-			if (!strcmp(argvs[i], lsValues[j]))
-			{
-				if ((ret == 1 && j == 2) || (ret == 2 && j == 1))
-				{
-					ret = 4;
-					break;
-				}
-				else
-					ret = j;
-			}
-		}
-	}
-	return ret;
-}
-
-void lsPrint(char *name)
-{
-	struct passwd *pw;
-	struct group *gp;
-	struct stat sb;
-
-	stat(name, &sb);
-
-	printf((S_ISDIR(sb.st_mode)) ? "d" : "-");
-	printf((sb.st_mode & S_IRUSR) ? "r" : "-");
-	printf((sb.st_mode & S_IWUSR) ? "w" : "-");
-	printf((sb.st_mode & S_IXUSR) ? "x" : "-");
-	printf((sb.st_mode & S_IRGRP) ? "r" : "-");
-	printf((sb.st_mode & S_IWGRP) ? "w" : "-");
-	printf((sb.st_mode & S_IXGRP) ? "x" : "-");
-	printf((sb.st_mode & S_IROTH) ? "r" : "-");
-	printf((sb.st_mode & S_IWOTH) ? "w" : "-");
-	printf((sb.st_mode & S_IXOTH) ? "x" : "-");
-	printf(" ");
-	printf("%ld ", sb.st_nlink);
-	pw = getpwuid(sb.st_uid);
-	printf("%s ", pw->pw_name);
-	gp = getgrgid(sb.st_gid);
-	printf("%s ", gp->gr_name);
-	printf("%5ld ", sb.st_size);
-	char *c = ctime(&sb.st_mtime);
-	for (int i = 4; i <= 15; i++)
-		printf("%c", c[i]);
-	printf(" ");
-	printf("%s\n", name);
-}
-
 void adjustForTilda(char *argsForCommand)
 {
 	int n = strlen(argsForCommand);
@@ -140,82 +74,13 @@ void adjustForTilda(char *argsForCommand)
 	else
 	{
 		for (int i = 0; i < strlen(argsForCommand); i++)
-		{
 			argsForCommand[i + strlen(swd)] = argsForCommand[i + 1];
-		}
-		// argsForCommand[strlen(swd)]='/';
-
 		for (int i = 0; i < strlen(swd); i++)
 			argsForCommand[i] = swd[i];
-		// argsForCommand[strlen(cwd)+len+1]='\0';
 	}
 }
 
-void ls(char argvs[1024][1024], int argc)
-{
-	int lsFlag = setlsFlag(argvs, argc);
-	char dirname[100];
-	DIR *p;
-	struct dirent *d;
 
-	if (lsFlag == -1)
-	{
-		if (!strcmp("", argvs[0]))
-		{
-			strcpy(dirname, ".");
-		}
-		else
-		{
-			adjustForTilda(argvs[0]);
-			strcpy(dirname, argvs[0]);
-		}
-	}
-	else
-	{
-		if (argvs[argc - 1][0] != '-')
-		{
-			adjustForTilda(argvs[argc - 1]);
-			strcpy(dirname, argvs[argc - 1]);
-		}
-		else
-			strcpy(dirname, ".");
-	}
-
-	p = opendir(dirname);
-	if (p == NULL)
-	{
-		perror("Cannot find directory");
-	}
-	else
-	{
-		while (d = readdir(p))
-		{
-			if (lsFlag == 0)
-			{
-				if (d->d_name[0] != '.')
-					printf("%s\n", d->d_name);
-			}
-			else if (lsFlag == 1)
-			{
-				if (d->d_name[0] != '.')
-					lsPrint(d->d_name);
-			}
-			else if (lsFlag == 2)
-			{
-				printf("%s\n", d->d_name);
-			}
-			else if (lsFlag > 2)
-			{
-				lsPrint(d->d_name);
-			}
-			else if (lsFlag < 0)
-			{
-				if (d->d_name[0] != '.')
-					printf("%s\n", d->d_name);
-			}
-		}
-	}
-}
 
 int parseInput(char *curCommand, char *argsForCommand)
 {
@@ -345,73 +210,6 @@ int to_int(char *num)
 	return ret;
 }
 
-void printPinfoLocation(pid_t pid)
-{
-
-	char buff[100];
-	char path[32];
-	sprintf(path, "/proc/%d/exe", pid);
-	readlink(path, buff, 100);
-	char *location;
-	location = directorySet(buff, swd);
-	for (int i = strlen(location) - 1; i > -1; i--)
-		if (location[i] > 'z' || location[i] < 'A')
-		{
-			if (location[i] != '~' && location[i] != '/' && location[i] != '.')
-			{
-				location[i] = '\0';
-				break;
-			}
-		}
-	printf("Executable Path -- %s\n", location);
-}
-
-void printPinfoStateandMemory(pid_t pid)
-{
-
-	char *buff;
-	size_t buffsize = 0;
-	char path[32];
-	sprintf(path, "/proc/%d/status", pid);
-	FILE *fd = fopen(path, "r");
-	for (int i = 0; i < 3; i++)
-		getline(&buff, &buffsize, fd);
-	printf("Process Status -- %c\n", buff[7]);
-	for (int i = 0; i < 14; i++)
-		getline(&buff, &buffsize, fd);
-	printf("Memory -- %s", buff + 10);
-}
-
-int checkPid(pid_t pid)
-{
-	char path[32];
-	sprintf(path, "/proc/%d/status", pid);
-	int fd = open(path, O_RDONLY);
-	if (fd == -1)
-		return 0;
-	return 1;
-}
-
-void pinfo(char argvs[1024][1024], int argc)
-{
-	pid_t pid;
-	if (argc == 0)
-		pid = getpid();
-	else if (argc == 1)
-		pid = to_int(argvs[0]);
-	else if (argc > 1)
-	{
-		printf("Too many arguments\n");
-		return;
-	}
-
-	if (!checkPid(pid))
-		return;
-	printf("pid -- %d\n", pid);
-	printPinfoStateandMemory(pid);
-	printPinfoLocation(pid);
-}
-
 void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 {
 	char *new_argvs[1024];
@@ -491,114 +289,6 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 		}
 	}
 }
-
-// void history(char argvs[1024][1024], int argc)
-// {
-// 	int len_required = 100;
-// 	if (argc == 1)
-// 	{
-// 		len_required = to_int(argvs[0]);
-// 	}
-
-// 	HISTORY_STATE *myhist = history_get_history_state();
-
-// 	HIST_ENTRY **mylist = history_list();
-
-// 	int count = myhist->length > len_required ? len_required : myhist->length;
-// 	for (int i = myhist->length - 1; i > -1 && count > 0; i--)
-// 	{
-// 		if (i != myhist->length - 1)
-// 		{
-// 			if (strcmp(mylist[i]->line, mylist[i + 1]->line))
-// 			{
-// 				printf("%s\n", mylist[i]->line);
-// 				count--;
-// 			}
-// 		}
-// 		else
-// 		{
-// 			printf("%s\n", mylist[i]->line);
-// 			count--;
-// 		}
-// 	}
-// 	putchar('\n');
-// }
-
-// void nightswatch_dirty()
-// {
-// 	char *buff;
-// 	size_t buffsize = 0;
-// 	char path[32] = "/proc/meminfo\0";
-// 	FILE *fd = fopen(path, "r");
-// 	for (int i = 0; i < 17; i++)
-// 		getline(&buff, &buffsize, fd);
-// 	printf("%s\n", buff);
-// }
-
-// void nightswatch_interrupt_setup()
-// {
-// 	char *buff;
-// 	size_t buffsize = 0;
-// 	char path[32] = "/proc/interrupts\0";
-// 	FILE *fd = fopen(path, "r");
-// 	getline(&buff, &buffsize, fd);
-// 	printf("%s\n", buff);
-// }
-
-// void nightswatch_interrupt()
-// {
-// 	char *buff;
-// 	size_t buffsize = 0;
-// 	char path[32] = "/proc/interrupts\0";
-// 	FILE *fd = fopen(path, "r");
-// 	for (int i = 0; i < 3; i++)
-// 		getline(&buff, &buffsize, fd);
-// 	printf("%s\n", buff);
-// }
-
-// void nightswatch(char argvs[1024][1024], int argc)
-// {
-// 	int ttime = to_int(argvs[1]);
-// 	if (ttime == 0)
-// 	{
-// 		//error handling
-// 	}
-// 	int type;
-// 	if (!strcmp(argvs[2], "interrupt"))
-// 	{
-// 		type = 1;
-// 	}
-// 	else if (!strcmp(argvs[2], "dirty"))
-// 	{
-// 		type = 0;
-// 	}
-// 	else
-// 	{
-// 		//error handling
-// 	}
-
-// 	time_t starttime = time(NULL), prevtime = time(NULL);
-// 	if (type == 1)
-// 	{
-// 		nightswatch_interrupt_setup();
-// 	}
-// 	while (1)
-// 	{
-// 		time_t curtime = time(NULL);
-// 		if ((curtime - starttime) % ttime == 0 && curtime != prevtime)
-// 		{
-// 			prevtime = curtime;
-// 			if (!type)
-// 			{
-// 				nightswatch_dirty();
-// 			}
-// 			else
-// 			{
-// 				nightswatch_interrupt();
-// 			}
-// 		}
-// 	}
-// }
 
 void executeInBuiltCommand()
 {
