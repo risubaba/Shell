@@ -96,7 +96,7 @@ void executeInBuiltCommand()
 				nightswatch(argvs, argc);
 			}
 			else
-			{
+			{	
 				executeCommand(curCommand, argvs, argc);
 			}
 			k = 0;

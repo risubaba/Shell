@@ -1,9 +1,8 @@
-#include <sys/wait.h>
-#include <curses.h>
 #include "bonus.h"
 #include "pinfo.h"
 #include "ls.h"
 #include "builtIn.h"
+#include "executeCommand.h"
 
 #define INP_MAX 1024
 #define PATH_MAX 4096
@@ -131,91 +130,10 @@ int to_int(char *num)
 	return ret;
 }
 
-void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
-{
-	char *new_argvs[1024];
-	for (int i = 0; i < argc + 1; i++)
-	{
-		if (!i)
-			new_argvs[i] = curCommand;
-		else
-			new_argvs[i] = argvs[i - 1];
-	}
-
-	pid_t pid = fork();
-	if (pid < 0)
-	{
-		printf("Not able to fork properly\n");
-		return;
-	}
-	else if (pid == 0)
-	{
-		if (new_argvs[argc][0] == '&' && strlen(new_argvs[argc]) == 1)
-		{
-			new_argvs[argc][0] = '\0';
-			pid_t pid_child = fork();
-			if (pid_child < 0)
-			{
-				printf("Not able to fork properly\n");
-				return;
-			}
-			else if (pid_child == 0)
-			{
-				if (execvp(new_argvs[0], new_argvs) < 0)
-				{
-					printf("Error in executing command\n");
-				}
-			}
-			else
-			{
-				int status;
-				waitpid(pid_child, &status, 0);
-				if (status == 0)
-				{
-					printf("\nCommand %s with pid %d exited normally\n", new_argvs[0], (int)getpid());
-				}
-				else
-				{
-					printf("\nCommand %s with pid %d exited abnormally\n", new_argvs[0], (int)getpid());
-				}
-			}
-		}
-		else if (execvp(new_argvs[0], new_argvs) < 0)
-		{
-			printf("Error in executing command\n");
-		}
-	}
-	else
-	{
-		if (new_argvs[argc][0] == '&' && strlen(new_argvs[argc]) == 1)
-		{
-			new_argvs[argc][0] = '\0';
-
-			printf("Process started with pid %d\n", (int)pid);
-		}
-		else
-		{
-			int status = 0;
-			waitpid(pid, &status, 0);
-			if (status == 0)
-			{
-				printf("\nCommand %s with pid %d exited normally\n", new_argvs[0], (int)pid);
-			}
-			else
-			{
-				printf("\nCommand %s with pid %d exited abnormally\n", new_argvs[0], (int)pid);
-			}
-		}
-	}
-}
-
 int main()
 {
 	getcwd(swd, PATH_MAX);
 	using_history();
-	// int fd1 = open("/etc/inputrc",O_APPEND);
-	// write(fd1,"set history-size 20\n",strlen("set history-size 20\n"));
-	// close(fd1);
 	while (1)
 	{
 		printSystemName();

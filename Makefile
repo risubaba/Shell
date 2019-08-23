@@ -1,7 +1,7 @@
 LDFLAGS=-lncurses -readline
 
-a.out: main.o bonus.o pinfo.o ls.o builtIn.o
-		gcc main.o bonus.o pinfo.o ls.o builtIn.o -o a.out -lncurses -lreadline
+a.out: main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o
+		gcc main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o -o a.out -lncurses -lreadline
 
 main.o: main.c
 		gcc -c main.c
@@ -18,5 +18,8 @@ ls.o: ls.h ls.c
 builtIn.o: builtIn.h builtIn.c
 	gcc -c builtIn.c -o builtIn.o
 
+executeCommand.o: executeCommand.h executeCommand.c
+	gcc -c executeCommand.c -o executeCommand.o
+
 clean:
-		rm -rf main.o bonus.o pinfo.o ls.o builtIn.o a.out
+		rm -rf main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o a.out
