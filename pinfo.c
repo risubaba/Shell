@@ -30,7 +30,7 @@ void printPinfoStateandMemory(pid_t pid)
 	FILE *fd = fopen(path, "r");
 	for (int i = 0; i < 3; i++)
 		getline(&buff, &buffsize, fd);
-	printf("Process Status -- %c\n", buff[7]);
+	printf("Process Status -- %c%c\n", buff[7],buff[8]);
 	for (int i = 0; i < 14; i++)
 		getline(&buff, &buffsize, fd);
 	printf("Memory -- %s", buff + 10);
