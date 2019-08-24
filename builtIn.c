@@ -95,6 +95,18 @@ void executeInBuiltCommand()
 			{
 				nightswatch(argvs, argc);
 			}
+			else if (!strcmp(curCommand + inOffset, "clear"))
+			{
+				printf("\e[1;1H\e[2J");
+			}
+			else if (!strcmp(curCommand + inOffset, "exit"))
+			{
+				printf("Are you sure you want to exit [y/N]??");
+				char ex = getchar();
+				if (ex=='y' || ex == 'Y'){
+					exit(0);
+				}
+			}
 			else
 			{	
 				executeCommand(curCommand, argvs, argc);

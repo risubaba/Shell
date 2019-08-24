@@ -23,13 +23,24 @@ int setlsFlag(char argvs[1024][1024], int argc)
 	return ret;
 }
 
-void lsPrint(char *name)
+void lsPrint(char *name, int type)
 {
 	struct passwd *pw;
 	struct group *gp;
 	struct stat sb;
 
 	stat(name, &sb);
+
+	if (type)
+	{
+		if ((S_ISDIR(sb.st_mode)))
+			printf(KBLU "%s\n" RESET, name);
+		else if ((sb.st_mode & S_IXUSR))
+			printf(KGRN "%s\n" RESET, name);
+		else
+			printf("%s\n", name);
+		return ;
+	}
 
 	printf((S_ISDIR(sb.st_mode)) ? "d" : "-");
 	printf((sb.st_mode & S_IRUSR) ? "r" : "-");
@@ -52,7 +63,12 @@ void lsPrint(char *name)
 	for (int i = 4; i <= 15; i++)
 		printf("%c", c[i]);
 	printf(" ");
-	printf("%s\n", name);
+	if ((S_ISDIR(sb.st_mode)))
+		printf(KBLU "%s\n" RESET, name);
+	else if ((sb.st_mode & S_IXUSR))
+		printf(KGRN "%s\n" RESET, name);
+	else
+		printf("%s\n", name);
 }
 
 void ls(char argvs[1024][1024], int argc)
@@ -97,25 +113,25 @@ void ls(char argvs[1024][1024], int argc)
 			if (lsFlag == 0)
 			{
 				if (d->d_name[0] != '.')
-					printf("%s\n", d->d_name);
+					lsPrint(d->d_name,1);
 			}
 			else if (lsFlag == 1)
 			{
 				if (d->d_name[0] != '.')
-					lsPrint(d->d_name);
+					lsPrint(d->d_name,0);
 			}
 			else if (lsFlag == 2)
 			{
-				printf("%s\n", d->d_name);
+				lsPrint(d->d_name,1);
 			}
 			else if (lsFlag > 2)
 			{
-				lsPrint(d->d_name);
+				lsPrint(d->d_name,0);
 			}
 			else if (lsFlag < 0)
 			{
 				if (d->d_name[0] != '.')
-					printf("%s\n", d->d_name);
+					lsPrint(d->d_name,1);
 			}
 		}
 	}

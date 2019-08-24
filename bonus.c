@@ -41,10 +41,10 @@ void addHistory(char *inp)
             break;
         }
     }
+    char temp[20][1024];
     if (lines == 20)
     {
         fseek(fd, 0, SEEK_SET);
-        char temp[20][1024];
         for (int i = 0; i < 20; i++)
         {
             getline(&buff, &buffsize, fd);
@@ -52,10 +52,10 @@ void addHistory(char *inp)
                 strcpy(temp[i - 1], buff);
         }
         lines = 19;
+        fseek(fd, 0, SEEK_SET);
+        for (int i=0;i<lines-1;i++)
+            fprintf(fd,"%s",temp[i]);
     }
-    fseek(fd, 0, SEEK_SET);
-    while ((lines)--)
-        getline(&buff, &buffsize, fd);
     if (strcmp(buff, inp))
     {
         fprintf(fd, "%s", inp);
@@ -188,3 +188,5 @@ void nightswatch(char argvs[1024][1024], int argc)
         }
     }
 }
+
+

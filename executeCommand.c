@@ -33,25 +33,28 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 				if (execvp(new_argvs[0], new_argvs) < 0)
 				{
 					printf("Error in executing command\n");
+					return ;
 				}
 			}
 			else
 			{
 				int status=0;
 				waitpid(pid_child, &status, 0);
+				int currpid=getpid();
 				if (!status)
 				{
-					printf("\nCommand %s with pid %d exited normally\n", new_argvs[0], (int)getpid());
+					printf("\nCommand %s with pid %d exited normally\n", new_argvs[0],currpid);
 				}
 				else
 				{
-					printf("\nCommand %s with pid %d exited abnormally\n", new_argvs[0], (int)getpid());
+					printf("\nCommand %s with pid %d exited abnormally\n", new_argvs[0],currpid);
 				}
 			}
 		}
 		else if (execvp(new_argvs[0], new_argvs) < 0)
 		{
 			printf("Error in executing command\n");
+			return;
 		}
 	}
 	else
@@ -60,7 +63,7 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 		{
 			new_argvs[argc][0] = '\0';
 
-			printf("Process started with pid %d\n", (int)pid);
+			printf("Process started with pid %d\n", pid);
 		}
 		else
 		{
@@ -68,11 +71,11 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 			waitpid(pid, &status, 0);
 			if (!status)
 			{
-				printf("\nCommand %s with pid %d exited normally\n", new_argvs[0], (int)pid);
+				printf("\nCommand %s with pid %d exited normally\n", new_argvs[0], pid);
 			}
 			else
 			{
-				printf("\nCommand %s with pid %d exited abnormally\n", new_argvs[0], (int)pid);
+				printf("\nCommand %s with pid %d exited abnormally\n", new_argvs[0],pid);
 			}
 		}
 	}

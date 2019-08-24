@@ -6,6 +6,9 @@
 
 #define INP_MAX 1024
 #define PATH_MAX 4096
+#define RESET "\x1B[0m"
+#define KCYN  "\x1B[36m"
+#define CYN   "\x1B[36m"
 
 char cwd[PATH_MAX];
 char swd[PATH_MAX];
@@ -52,7 +55,7 @@ void printSystemName()
 	{
 		char *directory;
 		directory = directorySet(cwd, swd);
-		printf("<%s@%s:%s>", uName, sName, directory);
+		printf(KCYN"<%s@%s:%s>"RESET, uName, sName, directory);
 	} 
 	else
 	{

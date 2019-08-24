@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <sys/select.h>
+
+
 #include <time.h>
 #define INP_MAX 1024
 
