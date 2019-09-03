@@ -151,8 +151,23 @@ int get_input()
 		if (inp_ch == '\033')
 			last_car = i;
 		if (inp_ch == 'A')
+		{
 			if (i - last_car == 2)
-				ret++;
+			{
+				if (i > 3 && ret)
+					ret++;
+				else if (i == 3)
+					ret++;
+				else
+				{
+					ret = -1;
+					inp[0] = '\n';
+					while ((getchar()) != '\n')
+						; // to flush something
+					return ret;
+				}
+			}
+		}
 		scanf("%c", &inp_ch);
 		inp[i++] = inp_ch;
 	}
@@ -164,17 +179,34 @@ int main()
 {
 	getcwd(swd, PATH_MAX);
 	int hist = initializeHistory();
+	char recall_command[1024];
 	while (1)
 	{
 		printSystemName();
 		int recall = get_input();
 		if (hist)
-			addHistory(inp);
-		if (recall)
+			if (recall == 0)
+				addHistory(inp);
+		if (recall > 0)
 		{
-			recall_history(recall);
-			continue;
+			strcpy(recall_command, recall_history(recall));
+			printSystemName();
+			recall_command[strlen(recall_command)-1]='\0';
+			printf("%s",recall_command);
+			char ch[1024];
+			fgets(ch,1024,stdin);
+			if (strlen(ch)==1)
+			{
+				strcpy(inp, recall_command);
+				recall = 0;
+			}
+			else
+			{
+				recall = -1;
+				continue;
+			}
 		}
-		executeInBuiltCommand();
+		if (recall == 0)
+			executeInBuiltCommand();
 	}
 }

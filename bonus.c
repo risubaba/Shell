@@ -41,6 +41,11 @@ void addHistory(char *inp)
             lines = i;
             break;
         }
+        if (buff[0] == '\033')
+        {
+            lines = i;
+            break;
+        }
     }
     char temp[20][1024];
     if (lines == 20)
@@ -55,11 +60,11 @@ void addHistory(char *inp)
         lines = 19;
         fseek(fd, 0, SEEK_SET);
         for (int i = 0; i < lines - 1; i++)
-            fprintf(fd, "%s", temp[i]);
+            fprintf(fd, "%s\n", temp[i]);
     }
-    if (strcmp(buff, inp))
+    if (strcmp(buff, inp) && buff[0] != '\033')
     {
-        fprintf(fd, "%s", inp);
+        fprintf(fd, "%s\n", inp);
     }
     fclose(fd);
 }
@@ -96,6 +101,11 @@ void history(char argvs[1024][1024], int argc)
             lines = i;
             break;
         }
+        if (buff[0] == '\033')
+        {
+            lines = i;
+            break;
+        }
     }
     fseek(fd, 0, SEEK_SET);
     char hist[20][1024];
@@ -112,7 +122,7 @@ void history(char argvs[1024][1024], int argc)
     }
 }
 
-void recall_history(int recall_number)
+char* recall_history(int recall_number)
 {
 
     char filepath[1024];
@@ -122,8 +132,39 @@ void recall_history(int recall_number)
     if (fd == NULL)
     {
         printf("Error : History for session won't be saved\n");
-        return;
+        return NULL;
     }
+    char* temp;
+    char *buff;
+    size_t buffsize = 0;
+    int lines = 0;
+    for (int i = 0;; i++)
+    {
+        if (getline(&buff, &buffsize, fd) == -1)
+        {
+            lines = i;
+            break;
+        }
+        if (!strcmp("", buff))
+        {
+            lines = i;
+            break;
+        }
+        if (buff[0] == '\033')
+        {
+            lines = i;
+            break;
+        }
+    }
+    fseek(fd, 0, SEEK_SET);
+    recall_number = lines - recall_number +1 > 1 ? lines - recall_number + 1 : 1;
+    for (int i = 0; i < recall_number; i++)
+    {
+        getline(&buff, &buffsize, fd);
+        strcpy(temp, buff);
+    }
+    // printf("%s",temp);
+    return temp;
 }
 
 void nightswatch_dirty()
