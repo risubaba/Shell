@@ -153,7 +153,6 @@ int main()
 		char* temp;
 		printSystemName();
 		temp=readline(prompt);
-		if (strlen(temp)) add_history(temp);
 		strcpy(inp,temp);
 		free(temp);
 		if (hist)
