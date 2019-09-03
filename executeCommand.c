@@ -10,7 +10,6 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 		else
 			new_argvs[i] = argvs[i - 1];
 	}
-
 	pid_t pid = fork();
 	if (pid < 0)
 	{

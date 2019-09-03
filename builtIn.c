@@ -21,7 +21,6 @@ void cd(char *argsForCommand)
 
 void pwd(char argvs[1024][1024])
 {
-	printf("%s", argvs[0]);
 	if (strcmp(argvs[0], ""))
 	{
 		printf("Too many arguments\n");

@@ -3,23 +3,27 @@
 #include "ls.h"
 #include "builtIn.h"
 #include "executeCommand.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #define INP_MAX 1024
 #define PATH_MAX 4096
 #define RESET "\x1B[0m"
-#define KCYN  "\x1B[36m"
-#define CYN   "\x1B[36m"
+#define KCYN "\x1B[36m"
+#define CYN "\x1B[36m"
 
 char cwd[PATH_MAX];
 char swd[PATH_MAX];
 char ret[PATH_MAX];
 char inp[INP_MAX];
+char prompt[4*INP_MAX];
 
 //set error messages wherever required
 //add colour to printf
 //add <usage> to error messages
 //add exit message for ^D
 //try to adjust for ls -l ~/child (Wrong permissions)
+//check for grep
 
 char *directorySet(char *cwd, char *swd)
 {
@@ -55,23 +59,24 @@ void printSystemName()
 	{
 		char *directory;
 		directory = directorySet(cwd, swd);
-		printf(KCYN"<%s@%s:%s>"RESET, uName, sName, directory);
-	} 
+		sprintf(prompt,"<%s@%s:%s>",uName, sName, directory);
+	}
 	else
 	{
-		printf("Error getting current working directorty file path\n");
-		return;
+		sprintf(prompt,"Error getting current working directorty file path\n");
 	}
-	
 }
 
 void adjustForTilda(char *argsForCommand)
 {
 	int n = strlen(argsForCommand);
 	int len = strlen(argsForCommand);
-	if (getcwd(cwd,4096)==NULL) printf("Error in updating cwd\n");
+	if (getcwd(cwd, 4096) == NULL)
+		printf("Error in updating cwd\n");
 	if (argsForCommand[0] != '~')
 	{
+		if (argsForCommand[0]=='/')
+			return;
 		for (int i = 0; i < strlen(argsForCommand); i++)
 			argsForCommand[i + strlen(cwd) + 1] = argsForCommand[i];
 		argsForCommand[strlen(cwd)] = '/';
@@ -142,12 +147,17 @@ int to_int(char *num)
 int main()
 {
 	getcwd(swd, PATH_MAX);
-	int hist=initializeHistory();
+	int hist = initializeHistory();
 	while (1)
 	{
+		char* temp;
 		printSystemName();
-		fgets(inp, INP_MAX, stdin);
-		if (hist) addHistory(inp);
+		temp=readline(prompt);
+		if (strlen(temp)) add_history(temp);
+		strcpy(inp,temp);
+		free(temp);
+		if (hist)
+			addHistory(inp);
 		executeInBuiltCommand();
 	}
 }

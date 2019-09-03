@@ -1,7 +1,7 @@
-LDFLAGS=-lncurses
+LDFLAGS=-lncurses -lreadline
 
 a.out: main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o history
-		gcc main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o -o a.out -lncurses -g
+		gcc main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o -o a.out -lncurses -lreadline -g
 
 main.o: main.c
 		gcc -c main.c
