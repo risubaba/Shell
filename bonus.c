@@ -3,8 +3,8 @@
 int initializeHistory()
 {
     char filepath[1024];
-    strcpy(filepath,swd);
-    strcat(filepath,"/.history");
+    strcpy(filepath, swd);
+    strcat(filepath, "/.history");
     FILE *fd = fopen(filepath, "r+");
     if (fd == NULL)
     {
@@ -18,12 +18,13 @@ int initializeHistory()
 void addHistory(char *inp)
 {
     char filepath[1024];
-    strcpy(filepath,swd);
-    strcat(filepath,"/.history");
+    strcpy(filepath, swd);
+    strcat(filepath, "/.history");
     FILE *fd = fopen(filepath, "r+");
-    if (fd==NULL){
+    if (fd == NULL)
+    {
         printf("Error : History for session won't be saved\n");
-        return ;
+        return;
     }
     char *buff;
     size_t buffsize = 0;
@@ -53,8 +54,8 @@ void addHistory(char *inp)
         }
         lines = 19;
         fseek(fd, 0, SEEK_SET);
-        for (int i=0;i<lines-1;i++)
-            fprintf(fd,"%s",temp[i]);
+        for (int i = 0; i < lines - 1; i++)
+            fprintf(fd, "%s", temp[i]);
     }
     if (strcmp(buff, inp))
     {
@@ -65,7 +66,7 @@ void addHistory(char *inp)
 
 void history(char argvs[1024][1024], int argc)
 {
-    char* buff;
+    char *buff;
     size_t buffsize = 0;
     int len_required = 10;
     if (argc == 1)
@@ -80,8 +81,8 @@ void history(char argvs[1024][1024], int argc)
     }
     int lines = 0;
     char filepath[1024];
-    strcpy(filepath,swd);
-    strcat(filepath,"/.history");
+    strcpy(filepath, swd);
+    strcat(filepath, "/.history");
     FILE *fd = fopen(filepath, "r+");
     for (int i = 0;; i++)
     {
@@ -106,8 +107,22 @@ void history(char argvs[1024][1024], int argc)
     int count = lines > len_required ? len_required : lines;
     for (int i = lines; i > -1 && count > -1; i--)
     {
-        printf("%s",hist[i]);
+        printf("%s", hist[i]);
         count--;
+    }
+}
+
+void recall_history(int recall_number)
+{
+
+    char filepath[1024];
+    strcpy(filepath, swd);
+    strcat(filepath, "/.history");
+    FILE *fd = fopen(filepath, "r+");
+    if (fd == NULL)
+    {
+        printf("Error : History for session won't be saved\n");
+        return;
     }
 }
 
@@ -149,7 +164,7 @@ void nightswatch(char argvs[1024][1024], int argc)
     if (ttime == 0)
     {
         printf("Time interval has to be a positive number\n");
-        return ;
+        return;
     }
     int type;
     if (!strcmp(argvs[2], "interrupt"))
@@ -188,5 +203,3 @@ void nightswatch(char argvs[1024][1024], int argc)
         }
     }
 }
-
-

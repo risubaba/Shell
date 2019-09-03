@@ -13,6 +13,7 @@ extern char swd[4096];
 extern char inp[INP_MAX];
 int initializeHistory();
 void addHistory(char *);
+void recall_history(int);
 void history (char [1024][1024],int);
 void nightswatch_dirty();
 void nightswatch_interrupt_setup();

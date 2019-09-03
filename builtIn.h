@@ -16,6 +16,7 @@ extern void history (char [1024][1024],int );
 extern void pinfo (char [1024][1024],int );
 extern void executeCommand (char *,char [1024][1024],int );
 extern void nightswatch (char [1024][1024],int );
+extern void recall_history(int);
 void cd (char* );
 void pwd (char [1024][1024]);
 void Echo (char* );

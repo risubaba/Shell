@@ -141,6 +141,25 @@ int to_int(char *num)
 	return ret;
 }
 
+int get_input()
+{
+	char inp_ch = '\0';
+	int i = 0, ret = 0;
+	int last_car = 0;
+	while (inp_ch != '\n')
+	{
+		if (inp_ch == '\033')
+			last_car = i;
+		if (inp_ch == 'A')
+			if (i - last_car == 2)
+				ret++;
+		scanf("%c", &inp_ch);
+		inp[i++] = inp_ch;
+	}
+	inp[i - 1] = '\0';
+	return ret;
+}
+
 int main()
 {
 	getcwd(swd, PATH_MAX);
@@ -148,9 +167,14 @@ int main()
 	while (1)
 	{
 		printSystemName();
-		fgets(inp, INP_MAX, stdin);
+		int recall = get_input();
 		if (hist)
 			addHistory(inp);
+		if (recall)
+		{
+			recall_history(recall);
+			continue;
+		}
 		executeInBuiltCommand();
 	}
 }

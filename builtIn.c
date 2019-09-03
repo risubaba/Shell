@@ -31,22 +31,33 @@ void pwd(char argvs[1024][1024])
 	}
 }
 
+void shell_exit()
+{
+	printf("Are you sure you want to exit [y/N]??");
+	char ex = getchar();
+	if (ex == 'y' || ex == 'Y')
+	{
+		exit(0);
+	}
+}
+
 void Echo(char *argsForCommand)
 {
-    for (int j = 0; j < strlen(argsForCommand); j++)
-    {
-        if (argsForCommand[j] != ' ')
-            printf("%c", argsForCommand[j]);
-        else
-        {
-            while (argsForCommand[j]==' '){
-                j++;
-            }
-            j--;
-            printf(" ");
-        }
-    }
-    printf("\n");
+	for (int j = 0; j < strlen(argsForCommand); j++)
+	{
+		if (argsForCommand[j] != ' ')
+			printf("%c", argsForCommand[j]);
+		else
+		{
+			while (argsForCommand[j] == ' ')
+			{
+				j++;
+			}
+			j--;
+			printf(" ");
+		}
+	}
+	printf("\n");
 }
 
 void executeInBuiltCommand()
@@ -100,14 +111,10 @@ void executeInBuiltCommand()
 			}
 			else if (!strcmp(curCommand + inOffset, "exit"))
 			{
-				printf("Are you sure you want to exit [y/N]??");
-				char ex = getchar();
-				if (ex=='y' || ex == 'Y'){
-					exit(0);
-				}
+				shell_exit();
 			}
 			else
-			{	
+			{
 				executeCommand(curCommand, argvs, argc);
 			}
 			k = 0;
