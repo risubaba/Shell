@@ -51,7 +51,7 @@ void Echo(char argvs[1024][1024], int argc)
 }
 
 char commands[][1024] = {
-	"cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "exit", "cronjob"};
+	"cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob"};
 
 int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc)
 {

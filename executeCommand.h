@@ -5,4 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-void executeCommand(char* ,char [1024][1024],int );
+extern char swd[4096];
+void executeCommand(char *, char[1024][1024], int);
+void startJob(char *[1024], int, int);
