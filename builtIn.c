@@ -51,7 +51,7 @@ void Echo(char argvs[1024][1024], int argc)
 }
 
 char commands[][1024] = {
-	"cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob", "jobs"};
+	"cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob", "jobs", "setenv", "unsetenv"};
 
 int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc)
 {
@@ -98,6 +98,32 @@ int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024]
 	else if (!strcmp(curCommand + inOffset, commands[10]))
 	{
 		jobs(argvs, argc);
+	}
+	else if (!strcmp(curCommand + inOffset, commands[11]))
+	{
+		if (argc < 1 || argc > 2)
+		{
+			printf("Incorrect number of arguments\n");
+			return 0;
+		}
+		if (setenv(argvs[0],argvs[1],1)==-1)
+		{
+			printf("Error in setting environment variable");
+			return 0;
+		}
+	}
+	else if (!strcmp(curCommand + inOffset, commands[12]))
+	{
+		if (argc != 1)
+		{
+			printf("Incorrect number of arguments\n");
+			return 0;
+		}
+		if (unsetenv(argvs[0])==-1)
+		{
+			printf("Error in unsetting environment variable");
+			return 0;
+		}
 	}
 	else
 	{
