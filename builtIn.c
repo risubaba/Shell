@@ -51,7 +51,7 @@ void Echo(char argvs[1024][1024], int argc)
 }
 
 char commands[][1024] = {
-	"cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob"};
+	"cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob", "jobs"};
 
 int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc)
 {
@@ -94,6 +94,10 @@ int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024]
 	else if (!strcmp(curCommand + inOffset, commands[9]))
 	{
 		cronjob(argvs, argc);
+	}
+	else if (!strcmp(curCommand + inOffset, commands[10]))
+	{
+		jobs(argvs, argc);
 	}
 	else
 	{

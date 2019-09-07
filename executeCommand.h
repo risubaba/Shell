@@ -6,5 +6,7 @@
 #include <string.h>
 
 extern char swd[4096];
+extern int to_int(char *);
 void executeCommand(char *, char[1024][1024], int);
-void startJob(char *[1024], int, int);
+extern void startJob(char *[1024], int, int);
+extern void endJob(char *[1024], int, int);

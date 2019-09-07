@@ -1,7 +1,7 @@
 LDFLAGS=-lncurses -lreadline
 
-a.out: main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o ExtraFiles
-		gcc main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o -o a.out -lncurses -lreadline -g
+a.out: main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o jobs.o ExtraFiles
+		gcc main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o jobs.o -o a.out -lncurses -lreadline -g
 
 main.o: main.c
 		gcc -c main.c
@@ -21,8 +21,11 @@ builtIn.o: builtIn.h builtIn.c
 executeCommand.o: executeCommand.h executeCommand.c
 	gcc -c executeCommand.c -o executeCommand.o
 
+jobs.o: jobs.h jobs.c
+	gcc -c jobs.c -o jobs.o
+
 ExtraFiles: 
 	touch .history .jobs
 
 clean:
-		rm -rf main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o .history .jobs a.out
+		rm -rf main.o bonus.o pinfo.o ls.o builtIn.o executeCommand.o jobs.o .history .jobs a.out

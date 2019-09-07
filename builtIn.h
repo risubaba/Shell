@@ -18,6 +18,7 @@ extern void executeCommand(char *, char[1024][1024], int);
 extern void nightswatch(char[1024][1024], int);
 extern char *recall_history(int);
 extern void cronjob(char[1024][1024], int);
+extern void jobs(char[1024][1024], int);
 void cd(char *);
 void pwd(char[1024][1024]);
 void Echo(char[1024][1024], int);

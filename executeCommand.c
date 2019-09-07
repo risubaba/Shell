@@ -1,71 +1,5 @@
 #include "executeCommand.h"
 
-void startJob(char *new_argvs[1024], int argc, pid_t pid)
-{
-	char filepath[1024];
-	strcpy(filepath, swd);
-	strcat(filepath, "/.jobs");
-	FILE *fd = fopen(filepath, "r+");
-	if (fd == NULL)
-	{
-		printf("Error : Job Status for session won't be saved\n");
-		return;
-	}
-	char *buff;
-	size_t buffsize = 0;
-	int lines = 0;
-	for (int i = 0;; i++)
-	{
-		if (getline(&buff, &buffsize, fd) == -1)
-		{
-			lines = i;
-			break;
-		}
-		if (!strcmp("", buff))
-		{
-			lines = i;
-			break;
-		}
-	}
-	char temp[1024];
-	for (int i = 0; i < argc; i++)
-	{
-		strcat(temp, new_argvs[i]);
-		strcat(temp, " ");
-	}
-	fprintf(fd, "[%d] Running %s [%d]\n", lines+1, temp, pid);
-	fclose(fd);
-}
-
-void endJob(char *new_argvs[1024],int argc,pid_t pid)
-{
-	char filepath[1024];
-	strcpy(filepath, swd);
-	strcat(filepath, "/.jobs");
-	FILE *fd = fopen(filepath, "r+");
-	if (fd == NULL)
-	{
-		printf("Error : Job Status for session won't be saved\n");
-		return;
-	}
-	char *buff;
-	size_t buffsize = 0;
-	int lines = 0;
-	for (int i = 0;; i++)
-	{
-		if (getline(&buff, &buffsize, fd) == -1)
-		{
-			lines = i;
-			break;
-		}
-		if (!strcmp("", buff))
-		{
-			lines = i;
-			break;
-		}
-	}
-}
-
 void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 {
 	char *new_argvs[1024];
@@ -76,6 +10,7 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 		else
 			new_argvs[i] = argvs[i - 1];
 	}
+	new_argvs[argc + 1] = NULL;
 	pid_t pid = fork();
 	if (pid < 0)
 	{
@@ -108,6 +43,7 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 				int status = 0;
 				waitpid(pid_child, &status, 0);
 				int currpid = getpid();
+				endJob(new_argvs, argc, currpid);
 				//change to stopped in job file
 				if (!status)
 				{
@@ -132,8 +68,7 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 			new_argvs[argc][0] = '\0';
 
 			printf("Process started with pid %d\n", pid);
-			startJob(new_argvs,argc,pid);
-
+			startJob(new_argvs, argc, pid);
 		}
 		else
 		{
