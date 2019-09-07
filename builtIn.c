@@ -55,12 +55,12 @@ void Setenv(char argvs[1024][1024], int argc)
 	if (argc < 1 || argc > 2)
 	{
 		printf("Incorrect number of arguments\n");
-		return 0;
+		return ;
 	}
 	if (setenv(argvs[0], argvs[1], 1) == -1)
 	{
 		printf("Error in setting environment variable");
-		return 0;
+		return ;
 	}
 }
 
@@ -69,12 +69,12 @@ void Unsetenv(char argvs[1024][1024], int argc)
 	if (argc != 1)
 	{
 		printf("Incorrect number of arguments\n");
-		return 0;
+		return ;
 	}
 	if (unsetenv(argvs[0]) == -1)
 	{
 		printf("Error in unsetting environment variable");
-		return 0;
+		return ;
 	}
 }
 
