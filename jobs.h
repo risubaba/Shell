@@ -8,3 +8,4 @@ extern int to_int(char *);
 void startJob(char *[1024], int, int);
 void endJob(char *[1024], int, int);
 void jobs(char[1024][1024],int);
+void kjob(char[1024][1024],int);
