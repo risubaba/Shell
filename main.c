@@ -20,6 +20,7 @@ char inp[INP_MAX];
 //add <usage> to error messages
 //add exit message for ^D
 //try to adjust for ls -l ~/child (Wrong permissions)
+//add recalled command to .history file
 
 char *directorySet(char *cwd, char *swd)
 {
@@ -121,7 +122,7 @@ int parseArgsForCommand(char *argsForCommand, char argvs[1024][1024])
 		{
 			argvs[k][j] = argsForCommand[i], j++;
 		}
-		else
+		else if (j != 0)
 		{
 			argvs[k][j] = '\0', k++, j = 0;
 		}
@@ -191,11 +192,11 @@ int main()
 		{
 			strcpy(recall_command, recall_history(recall));
 			printSystemName();
-			recall_command[strlen(recall_command)-1]='\0';
-			printf("%s",recall_command);
+			recall_command[strlen(recall_command) - 1] = '\0';
+			printf("%s", recall_command);
 			char ch[1024];
-			fgets(ch,1024,stdin);
-			if (strlen(ch)==1)
+			fgets(ch, 1024, stdin);
+			if (strlen(ch) == 1)
 			{
 				strcpy(inp, recall_command);
 				recall = 0;

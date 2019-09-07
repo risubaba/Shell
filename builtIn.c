@@ -41,23 +41,64 @@ void shell_exit()
 	}
 }
 
-void Echo(char *argsForCommand)
+void Echo(char argvs[1024][1024], int argc)
 {
-	for (int j = 0; j < strlen(argsForCommand); j++)
+	for (int i = 0; i < argc; i++)
 	{
-		if (argsForCommand[j] != ' ')
-			printf("%c", argsForCommand[j]);
-		else
-		{
-			while (argsForCommand[j] == ' ')
-			{
-				j++;
-			}
-			j--;
-			printf(" ");
-		}
+		printf("%s ", argvs[i]);
 	}
 	printf("\n");
+}
+
+char commands[][1024] = {
+	"cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "exit", "cronjob"};
+
+int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc)
+{
+	if (!strcmp(curCommand + inOffset, commands[0]))
+	{
+		cd(argvs[0]);
+	}
+	else if (!strcmp(curCommand + inOffset, commands[1]))
+	{
+		pwd(argvs);
+	}
+	else if (!strcmp(curCommand + inOffset, commands[2]))
+	{
+		Echo(argvs, argc);
+	}
+	else if (!strcmp(curCommand + inOffset, commands[3]))
+	{
+		ls(argvs, argc);
+	}
+	else if (!strcmp(curCommand + inOffset, commands[4]))
+	{
+		pinfo(argvs, argc);
+	}
+	else if (!strcmp(curCommand + inOffset, commands[5]))
+	{
+		history(argvs, argc);
+	}
+	else if (!strcmp(curCommand + inOffset, commands[6]))
+	{
+		nightswatch(argvs, argc);
+	}
+	else if (!strcmp(curCommand + inOffset, commands[7]))
+	{
+		printf("\e[1;1H\e[2J");
+	}
+	else if (!strcmp(curCommand + inOffset, commands[8]))
+	{
+		shell_exit();
+	}
+	else if (!strcmp(curCommand + inOffset, commands[9]))
+	{
+		cronjob(argvs, argc);
+	}
+	else
+	{
+		executeCommand(curCommand, argvs, argc);
+	}
 }
 
 void executeInBuiltCommand()
@@ -77,46 +118,7 @@ void executeInBuiltCommand()
 			int inOffset = parseInput(curCommand, argsForCommand);
 			char argvs[1024][1024];
 			int argc = parseArgsForCommand(argsForCommand, argvs);
-			if (!strcmp(curCommand + inOffset, "cd"))
-			{
-				cd(argvs[0]);
-			}
-			else if (!strcmp(curCommand + inOffset, "pwd"))
-			{
-				pwd(argvs);
-			}
-			else if (!strcmp(curCommand + inOffset, "echo"))
-			{
-				Echo(argsForCommand);
-			}
-			else if (!strcmp(curCommand + inOffset, "ls"))
-			{
-				ls(argvs, argc);
-			}
-			else if (!strcmp(curCommand + inOffset, "pinfo"))
-			{
-				pinfo(argvs, argc);
-			}
-			else if (!strcmp(curCommand + inOffset, "history"))
-			{
-				history(argvs, argc);
-			}
-			else if (!strcmp(curCommand + inOffset, "nightswatch"))
-			{
-				nightswatch(argvs, argc);
-			}
-			else if (!strcmp(curCommand + inOffset, "clear"))
-			{
-				printf("\e[1;1H\e[2J");
-			}
-			else if (!strcmp(curCommand + inOffset, "exit"))
-			{
-				shell_exit();
-			}
-			else
-			{
-				executeCommand(curCommand, argvs, argc);
-			}
+			commandtoExecute(inOffset, curCommand, argvs, argc);
 			k = 0;
 		}
 	}

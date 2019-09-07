@@ -122,7 +122,7 @@ void history(char argvs[1024][1024], int argc)
     }
 }
 
-char* recall_history(int recall_number)
+char *recall_history(int recall_number)
 {
 
     char filepath[1024];
@@ -134,7 +134,7 @@ char* recall_history(int recall_number)
         printf("Error : History for session won't be saved\n");
         return NULL;
     }
-    char* temp;
+    char *temp;
     char *buff;
     size_t buffsize = 0;
     int lines = 0;
@@ -157,7 +157,7 @@ char* recall_history(int recall_number)
         }
     }
     fseek(fd, 0, SEEK_SET);
-    recall_number = lines - recall_number +1 > 1 ? lines - recall_number + 1 : 1;
+    recall_number = lines - recall_number + 1 > 1 ? lines - recall_number + 1 : 1;
     for (int i = 0; i < recall_number; i++)
     {
         getline(&buff, &buffsize, fd);
@@ -222,11 +222,11 @@ void nightswatch(char argvs[1024][1024], int argc)
         return;
     }
 
-    time_t starttime = time(NULL), prevtime = time(NULL);
     if (type == 1)
     {
         nightswatch_interrupt_setup();
     }
+    time_t starttime = time(NULL), prevtime = time(NULL);
     while (1)
     {
         time_t curtime = time(NULL);
@@ -241,6 +241,63 @@ void nightswatch(char argvs[1024][1024], int argc)
             {
                 nightswatch_interrupt();
             }
+        }
+    }
+}
+
+void cronjob(char argvs[1024][1024], int argc)
+{
+    printf("Cronjob\n");
+    // cronjob -c ls -t 3 -p 6
+    if (strcmp(argvs[0], "-c"))
+    {
+        printf("Please enter a valid argument\n");
+        return;
+    }
+    char temp_argvs[1024][1024];
+    int temp_argc;
+    char temp_curCommand[1024];
+    strcpy(temp_curCommand,argvs[1]);
+    int i = 2, j = 0;
+    for (; i < argc; i++)
+    {
+        if (strcmp("-t", argvs[i]))
+        {
+            strcpy(temp_argvs[j], argvs[i]);
+            j++;
+        }
+        else
+            break;
+    }
+    if (i == argc - 1)
+    {
+        printf("Please enter a valid argument\n");
+        return;
+    }
+    temp_argc = j;
+    int interval = to_int(argvs[i + 1]);
+    if (interval < 1)
+    {
+        printf("Interval has to be a positive number\n");
+        return;
+    }
+    if (strcmp(argvs[i + 2], "-p"))
+    {
+        printf("Please enter a valid argument\n");
+        return;
+    }
+    int total_time = to_int(argvs[i + 3]);
+    int repititions = total_time / interval;
+    time_t starttime = time(NULL), prevtime = time(NULL);
+    printf("HALLO\n");
+    while (1 && repititions)
+    {
+        time_t curtime = time(NULL);
+        if ((curtime - starttime) % interval == 0 && curtime != prevtime)
+        {
+            prevtime = curtime;
+            commandtoExecute(0,temp_curCommand,temp_argvs,temp_argc);
+            repititions--;
         }
     }
 }
