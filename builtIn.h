@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
-
+#include <sys/wait.h>
 #define PATH_MAX 4096
 #define INP_MAX 1024
 extern char swd[4096];
@@ -30,4 +30,5 @@ void Echo(char[1024][1024], int);
 void Setenv(char[1024][1024], int);
 void Unsetenv(char[1024][1024], int);
 void executeWithoutPipe(int, char *, char[1024][1024], int);
+void executeWithPipe(int, char *, char[1024][1024], int, int);
 void executeInBuiltCommand();

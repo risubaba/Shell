@@ -83,59 +83,60 @@ char commands[][1024] = {
 
 int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc)
 {
-	if (!strcmp(curCommand + inOffset, commands[0]))
+	curCommand+=inOffset;
+	if (!strcmp(curCommand, commands[0]))
 	{
 		cd(argvs[0]);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[1]))
+	else if (!strcmp(curCommand, commands[1]))
 	{
 		pwd(argvs);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[2]))
+	else if (!strcmp(curCommand, commands[2]))
 	{
 		Echo(argvs, argc);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[3]))
+	else if (!strcmp(curCommand, commands[3]))
 	{
 		ls(argvs, argc);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[4]))
+	else if (!strcmp(curCommand, commands[4]))
 	{
 		pinfo(argvs, argc);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[5]))
+	else if (!strcmp(curCommand, commands[5]))
 	{
 		history(argvs, argc);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[6]))
+	else if (!strcmp(curCommand, commands[6]))
 	{
 		nightswatch(argvs, argc);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[7]))
+	else if (!strcmp(curCommand, commands[7]))
 	{
 		printf("\e[1;1H\e[2J");
 	}
-	else if (!strcmp(curCommand + inOffset, commands[8]))
+	else if (!strcmp(curCommand, commands[8]))
 	{
 		shell_exit();
 	}
-	else if (!strcmp(curCommand + inOffset, commands[9]))
+	else if (!strcmp(curCommand, commands[9]))
 	{
 		cronjob(argvs, argc);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[10]))
+	else if (!strcmp(curCommand, commands[10]))
 	{
 		jobs(argvs, argc);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[11]))
+	else if (!strcmp(curCommand, commands[11]))
 	{
 		Setenv(argvs, argc);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[12]))
+	else if (!strcmp(curCommand, commands[12]))
 	{
 		Unsetenv(argvs, argc);
 	}
-	else if (!strcmp(curCommand + inOffset, commands[13]))
+	else if (!strcmp(curCommand, commands[13]))
 	{
 		kjob(argvs, argc);
 	}
@@ -200,11 +201,11 @@ void executeWithoutPipe(int inOffset, char curCommand[], char argvs[1024][1024],
 		dup2(savestdout, 1); //resetting stdin
 }
 
-void executeWithPipe(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc)
+void executeWithPipe(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc, int pipe_no)
 {
 	// printf("%d\n", argc);
-	int pipefd[2];
-	pipe(pipefd); // pipefd[0] is read and pipefd[1] is write end for pipe
+	// int pipefd[2];
+	// pipe(pipefd); // pipefd[0] is read and pipefd[1] is write end for pipe
 	char curPipeCommandArgs[1024][1024];
 	char curPipeCommand[1024];
 	int savestdin = dup(0);
@@ -231,10 +232,14 @@ void executeWithPipe(int inOffset, char curCommand[1024], char argvs[1024][1024]
 		}
 		if (!strcmp(argvs[i], "|"))
 		{
-			if (!fork())
+			int pipefd[2];
+			pipe(pipefd);
+			int status;
+			pid_t pid = fork();
+			if (pid == 0)
 			{
 				// printf("All Done\n");
-				printf("%s\n",curPipeCommand);
+				// printf("%s\n", curPipeCommand);
 				dup2(pipefd[1], 1);
 				// return ;
 				executeWithoutPipe(inOffset, curPipeCommand, curPipeCommandArgs, j - 1);
@@ -245,17 +250,20 @@ void executeWithPipe(int inOffset, char curCommand[1024], char argvs[1024][1024]
 				// return ;
 				dup2(pipefd[0], 0);
 				close(pipefd[1]);
+				waitpid(pid, &status, 0);
 				// close(pipefd[0]);
 			}
 			j = 0;
 			i++;
+			close(pipefd[1]);
+			close(pipefd[0]);
 		}
 	}
-	// printf("%s\n",curPipeCommand);
+	// printf("%s\n", curPipeCommand);
 	executeWithoutPipe(inOffset, curPipeCommand, curPipeCommandArgs, j - 1);
 	dup2(savestdin, 0);  //resetting stdin
 	dup2(savestdout, 1); //resetting stdin
-	// execvp(curPipeCommand[0], curPipeCommand);
+						 // execvp(curPipeCommand[0], curPipeCommand);
 }
 
 void executeInBuiltCommand()
@@ -276,10 +284,9 @@ void executeInBuiltCommand()
 			char argvs[1024][1024];
 			int argc = parseArgsForCommand(argsForCommand, argvs);
 			int pipe_present = checkPipe(argvs, &argc);
-
 			if (pipe_present > 0)
 			{
-				executeWithPipe(inOffset, curCommand, argvs, argc);
+				executeWithPipe(inOffset, curCommand, argvs, argc, pipe_present);
 			}
 			else
 				executeWithoutPipe(inOffset, curCommand, argvs, argc);

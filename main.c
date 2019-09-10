@@ -23,6 +23,7 @@ char inp[INP_MAX];
 //add recalled command to .history file
 //implement cd .. when at / (root)
 //shift all parsing commands to one file
+//adjust ls for using pipe multiple times
 
 char *directorySet(char *cwd, char *swd)
 {
@@ -118,6 +119,7 @@ int parseInput(char *curCommand, char *argsForCommand)
 int parseArgsForCommand(char *argsForCommand, char argvs[1024][1024])
 {
 	int k = 0, j = 0;
+	// printf("%s\n",argsForCommand);
 	for (int i = 0; i < strlen(argsForCommand); i++)
 	{
 		if (argsForCommand[i] != ' ' || argsForCommand[i] == '\0')
@@ -130,7 +132,7 @@ int parseArgsForCommand(char *argsForCommand, char argvs[1024][1024])
 		}
 	}
 	argvs[k][j] = '\0';
-	if (k || j)
+	if (j)
 		k++;
 	argvs[k][0] = '\0';
 	return k;
