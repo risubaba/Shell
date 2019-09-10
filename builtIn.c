@@ -191,11 +191,13 @@ void executeWithoutPipe(int inOffset, char curCommand[], char argvs[1024][1024],
 		}
 		dup2(ffd, STDOUT_FILENO);
 	}
-
+	// printf("%d %d\n", input_redir, output_redir);
 	argc = input_argc < argc ? input_argc : argc;
 	commandtoExecute(inOffset, curCommand, argvs, argc);
-	dup2(savestdin, 0);  //resetting stdin
-	dup2(savestdout, 1); //resetting stdin
+	if (input_redir)
+		dup2(savestdin, 0); //resetting stdin
+	if (output_redir)
+		dup2(savestdout, 1); //resetting stdin
 }
 
 void executeWithPipe(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc)
@@ -203,45 +205,57 @@ void executeWithPipe(int inOffset, char curCommand[1024], char argvs[1024][1024]
 	// printf("%d\n", argc);
 	int pipefd[2];
 	pipe(pipefd); // pipefd[0] is read and pipefd[1] is write end for pipe
-	char *curPipeCommand[1024];
-	for (int i = 0, j = 0; i < argc + 1; i++)
+	char curPipeCommandArgs[1024][1024];
+	char curPipeCommand[1024];
+	int savestdin = dup(0);
+	int savestdout = dup(1);
+	int i = 0, j = 0;
+	for (; i < argc + 1; i++)
 	{
-		if (i == 0)
-			curPipeCommand[j] = curCommand, j++;
+		if (j == 0)
+		{
+			if (i == 0)
+				strcpy(curPipeCommand, curCommand);
+			else
+				strcpy(curPipeCommand, argvs[i - 1]);
+			j++;
+		}
 		else
 		{
 			if (strcmp(argvs[i - 1], "|"))
-				curPipeCommand[j] = argvs[i - 1], curPipeCommand[j + 1] = NULL, j++;
+			{
+				strcpy(curPipeCommandArgs[j - 1], argvs[i - 1]);
+				// strcpy(curPipeCommandArgs[j], '\0');
+				j++;
+			}
 		}
 		if (!strcmp(argvs[i], "|"))
 		{
-			// printf("HEllo %d \n", i);
-			// if (i==argc)
-			// 	j++;
-			// printf("Current command with j ++++ %d\n", j);
-			// for (int k = 0; k < j; k++)
-				// printf("%s\n", curPipeCommand[k]);
-			if (i != argc - 1)
-				curPipeCommand[j] = NULL;
 			if (!fork())
 			{
-				// close(pipefd[0]);
+				// printf("All Done\n");
+				printf("%s\n",curPipeCommand);
 				dup2(pipefd[1], 1);
-				// close(pipefd[1]);
-				execvp(curPipeCommand[0], curPipeCommand);
-				// executeWithoutPipe(inOffset,curPipeCommand)
+				// return ;
+				executeWithoutPipe(inOffset, curPipeCommand, curPipeCommandArgs, j - 1);
 				abort();
 			}
 			else
 			{
+				// return ;
 				dup2(pipefd[0], 0);
 				close(pipefd[1]);
 				// close(pipefd[0]);
 			}
 			j = 0;
+			i++;
 		}
 	}
-	execvp(curPipeCommand[0], curPipeCommand);
+	// printf("%s\n",curPipeCommand);
+	executeWithoutPipe(inOffset, curPipeCommand, curPipeCommandArgs, j - 1);
+	dup2(savestdin, 0);  //resetting stdin
+	dup2(savestdout, 1); //resetting stdin
+	// execvp(curPipeCommand[0], curPipeCommand);
 }
 
 void executeInBuiltCommand()
@@ -262,6 +276,7 @@ void executeInBuiltCommand()
 			char argvs[1024][1024];
 			int argc = parseArgsForCommand(argsForCommand, argvs);
 			int pipe_present = checkPipe(argvs, &argc);
+
 			if (pipe_present > 0)
 			{
 				executeWithPipe(inOffset, curCommand, argvs, argc);
