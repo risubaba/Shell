@@ -195,17 +195,20 @@ void executeInBuiltCommand()
 				k = 0;
 				continue;
 			}
-			else if (output_redir == 1)
+			else if (output_redir > 0)
 			{
 				printf("%s\n", output_file);
-				int ffd = open(output_file, O_WRONLY | O_CREAT, 0644);
+				int ffd;
+				if (output_redir==1)
+				ffd = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+				else 
+				ffd = open(output_file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 				if (ffd == -1)
 				{
 					printf("File doesn't exist\n");
 					return;
 				}
 				dup2(ffd, STDOUT_FILENO);
-				// close(ffd);
 			}
 
 			// printf("AM HERE\n");

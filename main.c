@@ -136,43 +136,55 @@ int parseArgsForCommand(char *argsForCommand, char argvs[1024][1024])
 	return k;
 }
 
-int checkInpRedir(char argvs[1024][1024],int *argc , char input_file[])
+int checkInpRedir(char argvs[1024][1024], int *argc, char input_file[])
 {
-	int i=0;
-	for (;i<*argc;i++)
+	int i = 0;
+	for (; i < *argc; i++)
 	{
-		if (!strcmp(argvs[i],"<"))
+		if (!strcmp(argvs[i], "<"))
 		{
-			if (i==*argc-1)
+			if (i == *argc - 1)
 			{
 				printf("Wrong Syntax for input redirection\n");
 				return -1;
 			}
-			strcpy(input_file,argvs[i+1]);
-			argvs[i][0]='\0';
-			*argc=i;
+			strcpy(input_file, argvs[i + 1]);
+			argvs[i][0] = '\0';
+			*argc = i;
 			return 1;
 		}
 	}
 	return 0;
 }
 
-int checkOutRedir(char argvs[1024][1024],int *argc , char output_file[])
+int checkOutRedir(char argvs[1024][1024], int *argc, char output_file[])
 {
-	int i=0;
-	for (;i<*argc;i++)
+	int i = 0;
+	for (; i < *argc; i++)
 	{
-		if (!strcmp(argvs[i],">"))
+		if (!strcmp(argvs[i], ">"))
 		{
-			if (i==*argc-1)
+			if (i == *argc - 1)
 			{
 				printf("Wrong Syntax for output redirection\n");
 				return -1;
 			}
-			strcpy(output_file,argvs[i+1]);
-			argvs[i][0]='\0';
-			*argc=i;
+			strcpy(output_file, argvs[i + 1]);
+			argvs[i][0] = '\0';
+			*argc = i;
 			return 1;
+		}
+		else if (!strcmp(argvs[i], ">>"))
+		{
+			if (i == *argc - 1)
+			{
+				printf("Wrong Syntax for output redirection\n");
+				return -1;
+			}
+			strcpy(output_file, argvs[i + 1]);
+			argvs[i][0] = '\0';
+			*argc = i;
+			return 2;
 		}
 	}
 	return 0;
