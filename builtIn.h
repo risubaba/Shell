@@ -29,4 +29,5 @@ void pwd(char[1024][1024]);
 void Echo(char[1024][1024], int);
 void Setenv(char[1024][1024], int);
 void Unsetenv(char[1024][1024], int);
+void executeWithoutPipe(int, char *, char[1024][1024], int);
 void executeInBuiltCommand();

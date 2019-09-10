@@ -190,6 +190,26 @@ int checkOutRedir(char argvs[1024][1024], int *argc, char output_file[])
 	return 0;
 }
 
+int checkPipe(char argvs[1024][1024], int *argc)
+{
+	int i = 0;
+	int ret=0;
+	for (; i < *argc; i++)
+	{
+		if (!strcmp(argvs[i], "|"))
+		{
+			if (i == *argc - 1)
+			{
+				printf("Wrong Syntax for piping\n");
+				return -1;
+			}
+			// strcpy(argvs[i]," ");
+			ret++;
+		}
+	}
+	return ret;
+}
+
 int to_int(char *num)
 {
 	int ret = 0;
