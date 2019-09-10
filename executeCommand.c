@@ -74,14 +74,14 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 		{
 			int status = 0;
 			waitpid(pid, &status, 0);
-			if (!status)
-			{
-				printf("\nCommand %s with pid %d exited normally\n", new_argvs[0], pid);
-			}
-			else
-			{
-				printf("\nCommand %s with pid %d exited abnormally\n", new_argvs[0], pid);
-			}
+			// if (!status)
+			// {
+			// 	printf("\nCommand %s with pid %d exited normally\n", new_argvs[0], pid);
+			// }
+			// else
+			// {
+			// 	printf("\nCommand %s with pid %d exited abnormally\n", new_argvs[0], pid);
+			// }
 		}
 	}
 }

@@ -151,7 +151,7 @@ void kjob(char argvs[1024][1024], int argc)
 		while (buff[pos] != ']')
 			pos++;
 		buff[pos] = '\0';
-		// printf("JOB NUMBER ---- %s\n", buff);
+		printf("JOB NUMBER ---- %s\n", buff);
 		if (job_given != to_int(buff))
 			continue;
 		buff[pos] = ' ';
@@ -162,10 +162,11 @@ void kjob(char argvs[1024][1024], int argc)
 		while (buff[pos] != ']')
 			pos++;
 		buff[pos] = '\0';
-		// printf("PID ---- %s\n", buff);
+		printf("PID ---- %s\n", buff);
 
 		pid_given = to_int(buff);
 	}
+	// printf("Am here and pid +++ %d\n",pid_given);
 	if (kill(pid_given, signal) == -1)
 	{
 		printf("Not able to send signal\n");

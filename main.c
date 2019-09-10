@@ -21,6 +21,8 @@ char inp[INP_MAX];
 //add exit message for ^D
 //try to adjust for ls -l ~/child (Wrong permissions)
 //add recalled command to .history file
+//implement cd .. when at / (root)
+//shift all parsing commands to one file
 
 char *directorySet(char *cwd, char *swd)
 {
@@ -132,6 +134,48 @@ int parseArgsForCommand(char *argsForCommand, char argvs[1024][1024])
 		k++;
 	argvs[k][0] = '\0';
 	return k;
+}
+
+int checkInpRedir(char argvs[1024][1024],int *argc , char input_file[])
+{
+	int i=0;
+	for (;i<*argc;i++)
+	{
+		if (!strcmp(argvs[i],"<"))
+		{
+			if (i==*argc-1)
+			{
+				printf("Wrong Syntax for input redirection\n");
+				return -1;
+			}
+			strcpy(input_file,argvs[i+1]);
+			argvs[i][0]='\0';
+			*argc=i;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int checkOutRedir(char argvs[1024][1024],int *argc , char output_file[])
+{
+	int i=0;
+	for (;i<*argc;i++)
+	{
+		if (!strcmp(argvs[i],">"))
+		{
+			if (i==*argc-1)
+			{
+				printf("Wrong Syntax for output redirection\n");
+				return -1;
+			}
+			strcpy(output_file,argvs[i+1]);
+			argvs[i][0]='\0';
+			*argc=i;
+			return 1;
+		}
+	}
+	return 0;
 }
 
 int to_int(char *num)
