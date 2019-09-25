@@ -5,6 +5,9 @@
 #include <curses.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
 
 extern char swd[4096];
 extern int to_int(char *);
