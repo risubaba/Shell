@@ -11,7 +11,8 @@ int initializeHistory()
         printf("Error : History for session won't be saved\n");
         return 0;
     }
-    else fclose(fd);
+    else
+        fclose(fd);
     return 1;
 }
 
@@ -198,7 +199,6 @@ void nightswatch_interrupt()
     for (int i = 0; i < 3; i++)
         getline(&buff, &buffsize, fd);
     printf("%s\n", buff);
-
 }
 
 void nightswatch(char argvs[1024][1024], int argc)
@@ -268,7 +268,10 @@ void cronjob(char argvs[1024][1024], int argc)
             j++;
         }
         else
+        {
+            temp_argvs[j][0] == '\0';
             break;
+        }
     }
     if (i == argc - 1)
     {
@@ -291,6 +294,8 @@ void cronjob(char argvs[1024][1024], int argc)
     int repititions = total_time / interval;
     time_t starttime = time(NULL), prevtime = time(NULL);
     pid_t pid = fork();
+    // int arr[100];
+    // int i=0;
     if (pid == 0)
     {
         while (1 && repititions)
@@ -299,10 +304,11 @@ void cronjob(char argvs[1024][1024], int argc)
             if ((curtime - starttime) % interval == 0 && curtime != prevtime)
             {
                 prevtime = curtime;
-
                 commandtoExecute(0, temp_curCommand, temp_argvs, temp_argc);
                 repititions--;
+
             }
         }
+        exit(0);
     }
 }
