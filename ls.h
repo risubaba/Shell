@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <grp.h>
+#include <stdlib.h>
 #include <pwd.h>
 #include <dirent.h>
 #include <sys/stat.h>

@@ -126,7 +126,7 @@ int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024]
 	}
 	else if (!strcmp(curCommand, commands[10]))
 	{
-		jobs(argvs, argc);
+		printJobs();
 	}
 	else if (!strcmp(curCommand, commands[11]))
 	{
@@ -136,10 +136,10 @@ int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024]
 	{
 		Unsetenv(argvs, argc);
 	}
-	else if (!strcmp(curCommand, commands[13]))
-	{
-		kjob(argvs, argc);
-	}
+	// else if (!strcmp(curCommand, commands[13]))
+	// {
+	// 	kjob(argvs, argc);
+	// }
 	else
 	{
 		executeCommand(curCommand, argvs, argc);

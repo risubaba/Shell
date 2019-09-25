@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/select.h>
 #include <time.h>
+#include <stdlib.h>
 #define INP_MAX 1024
 
 extern int to_int(char *);

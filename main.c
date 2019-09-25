@@ -3,6 +3,8 @@
 #include "ls.h"
 #include "builtIn.h"
 #include "executeCommand.h"
+#include <signal.h>
+#include "jobs.h"
 
 #define INP_MAX 1024
 #define PATH_MAX 4096
@@ -14,6 +16,7 @@ char cwd[PATH_MAX];
 char swd[PATH_MAX];
 char ret[PATH_MAX];
 char inp[INP_MAX];
+int piddd[100];
 
 //set error messages wherever required
 //add colour to printf
@@ -23,8 +26,9 @@ char inp[INP_MAX];
 //add recalled command to .history file
 //implement cd .. when at / (root)
 //shift all parsing commands to one file
-//adjust ls for using pipe multiple times
+//adjust ls for using pipe multiple times	
 //adjust for tab properly "ls \t doesn't work"
+//change up arrow recall to work in 1 enter -> up arrow enter -> command executed directly
 
 char *directorySet(char *cwd, char *swd)
 {
@@ -65,7 +69,6 @@ void printSystemName()
 	else
 	{
 		printf("Error getting current working directorty file path\n");
-		return;
 	}
 }
 
@@ -255,15 +258,28 @@ int get_input()
 	return ret;
 }
 
+void handler(int x){
+	// printf("\n%d\n",fg_process_pid);
+	if (fg_process_pid) kill(fg_process_pid,x);
+}
+
 int main()
 {
+	memset(piddd,-1,400);
 	getcwd(swd, PATH_MAX);
 	int hist = initializeHistory();
 	char recall_command[1024];
+	signal(SIGINT,handler);
+    signal(SIGQUIT, handler);
+    signal(SIGTSTP, handler);
 	while (1)
 	{
 		printSystemName();
+		// return 1;
 		int recall = get_input();
+		
+		if (inp[0]==' ' || inp[0]=='\0' ) continue;
+
 		if (hist)
 			if (recall == 0)
 				addHistory(inp);

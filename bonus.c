@@ -11,7 +11,7 @@ int initializeHistory()
         printf("Error : History for session won't be saved\n");
         return 0;
     }
-    fclose(fd);
+    else fclose(fd);
     return 1;
 }
 
@@ -67,6 +67,7 @@ void addHistory(char *inp)
         fprintf(fd, "%s\n", inp);
     }
     fclose(fd);
+    free(buff);
 }
 
 void history(char argvs[1024][1024], int argc)
@@ -197,6 +198,7 @@ void nightswatch_interrupt()
     for (int i = 0; i < 3; i++)
         getline(&buff, &buffsize, fd);
     printf("%s\n", buff);
+
 }
 
 void nightswatch(char argvs[1024][1024], int argc)
@@ -247,7 +249,6 @@ void nightswatch(char argvs[1024][1024], int argc)
 
 void cronjob(char argvs[1024][1024], int argc)
 {
-    printf("Cronjob\n");
     // cronjob -c ls -t 3 -p 6
     if (strcmp(argvs[0], "-c"))
     {
@@ -257,7 +258,7 @@ void cronjob(char argvs[1024][1024], int argc)
     char temp_argvs[1024][1024];
     int temp_argc;
     char temp_curCommand[1024];
-    strcpy(temp_curCommand,argvs[1]);
+    strcpy(temp_curCommand, argvs[1]);
     int i = 2, j = 0;
     for (; i < argc; i++)
     {
@@ -289,15 +290,19 @@ void cronjob(char argvs[1024][1024], int argc)
     int total_time = to_int(argvs[i + 3]);
     int repititions = total_time / interval;
     time_t starttime = time(NULL), prevtime = time(NULL);
-    printf("HALLO\n");
-    while (1 && repititions)
+    pid_t pid = fork();
+    if (pid == 0)
     {
-        time_t curtime = time(NULL);
-        if ((curtime - starttime) % interval == 0 && curtime != prevtime)
+        while (1 && repititions)
         {
-            prevtime = curtime;
-            commandtoExecute(0,temp_curCommand,temp_argvs,temp_argc);
-            repititions--;
+            time_t curtime = time(NULL);
+            if ((curtime - starttime) % interval == 0 && curtime != prevtime)
+            {
+                prevtime = curtime;
+
+                commandtoExecute(0, temp_curCommand, temp_argvs, temp_argc);
+                repititions--;
+            }
         }
     }
 }

@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <stdlib.h>
 #include <sys/wait.h>
 #define PATH_MAX 4096
 #define INP_MAX 1024
@@ -19,7 +20,7 @@ extern void executeCommand(char *, char[1024][1024], int);
 extern void nightswatch(char[1024][1024], int);
 extern char *recall_history(int);
 extern void cronjob(char[1024][1024], int);
-extern void jobs(char[1024][1024], int);
+extern void printJobs();
 extern void kjob(char[1024][1024], int);
 extern int checkInpRedir(char[1024][1024], int *, char *);
 extern int checkOutRedir(char[1024][1024], int *, char *);
