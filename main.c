@@ -24,6 +24,7 @@ char inp[INP_MAX];
 //implement cd .. when at / (root)
 //shift all parsing commands to one file
 //adjust ls for using pipe multiple times
+//adjust for tab properly "ls \t doesn't work"
 
 char *directorySet(char *cwd, char *swd)
 {

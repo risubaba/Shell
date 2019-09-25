@@ -83,7 +83,7 @@ char commands[][1024] = {
 
 int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc)
 {
-	curCommand+=inOffset;
+	curCommand += inOffset;
 	if (!strcmp(curCommand, commands[0]))
 	{
 		cd(argvs[0]);
@@ -263,7 +263,6 @@ void executeWithPipe(int inOffset, char curCommand[1024], char argvs[1024][1024]
 	executeWithoutPipe(inOffset, curPipeCommand, curPipeCommandArgs, j - 1);
 	dup2(savestdin, 0);  //resetting stdin
 	dup2(savestdout, 1); //resetting stdin
-						 // execvp(curPipeCommand[0], curPipeCommand);
 }
 
 void executeInBuiltCommand()
