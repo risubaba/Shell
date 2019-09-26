@@ -248,7 +248,7 @@ void nightswatch(char argvs[1024][1024], int argc)
 }
 
 char commandsBuiltIn[][1024] = {
-    "cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob", "jobs", "setenv", "unsetenv", "kjob"};
+    "cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob", "jobs", "setenv", "unsetenv", "kjob", "overkill", "fg", "bg"};
 
 int checkBuiltIn(char cronCommand[1024])
 {

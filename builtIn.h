@@ -22,10 +22,13 @@ extern char *recall_history(int);
 extern void cronjob(char[1024][1024], int);
 extern void printJobs();
 extern void kjob(char[1024][1024], int);
+extern void fg(char[1024][1024], int);
+extern void bg(char[1024][1024], int);
 extern int checkInpRedir(char[1024][1024], int *, char *);
 extern int checkOutRedir(char[1024][1024], int *, char *);
 extern int checkPipe(char[1024][1024], int *);
 extern void overkill();
+
 void cd(char *);
 void pwd(char[1024][1024]);
 void Echo(char[1024][1024], int);

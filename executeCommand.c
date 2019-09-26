@@ -73,7 +73,6 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 			waitpid(pid, &status, WUNTRACED);
 			if (WIFSTOPPED(status))
 			{
-				printf("am here\n");
 				startJob(new_argvs, argc, pid);
 			}
 			fg_process_pid = 0;

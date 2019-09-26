@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 extern char swd[4096];
 extern int to_int(char *);
@@ -15,4 +16,7 @@ void printJobs();
 void initializeJobs();
 int endJob(pid_t);
 void kjob(char[1024][1024], int);
-extern int pid[100];
+void fg(char[1024][1024], int);
+void bg(char[1024][1024], int);
+extern int fg_process_pid;
+extern void process_handler(int);
