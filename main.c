@@ -19,16 +19,15 @@ char inp[INP_MAX];
 int piddd[100];
 
 //set error messages wherever required
-//add colour to printf
 //add <usage> to error messages
-//add exit message for ^D
 //try to adjust for ls -l ~/child (Wrong permissions)
 //add recalled command to .history file
 //implement cd .. when at / (root)
 //shift all parsing commands to one file
-//adjust ls for using pipe multiple times	
+//adjust ls for using pipe multiple times
 //adjust for tab properly "ls \t doesn't work"
 //change up arrow recall to work in 1 enter -> up arrow enter -> command executed directly
+//handle ctrl-D
 
 char *directorySet(char *cwd, char *swd)
 {
@@ -102,13 +101,13 @@ int parseInput(char *curCommand, char *argsForCommand)
 {
 	int inOffset = 0, k = strlen(curCommand);
 
-	while (curCommand[inOffset] == ' ')
+	while (curCommand[inOffset] == ' ' || curCommand[inOffset]=='\t')
 		inOffset++;
 	int argsOffset = inOffset;
-	while (curCommand[argsOffset] != ' ' && curCommand[argsOffset] != '\0')
+	while (curCommand[argsOffset] != ' ' && curCommand[argsOffset] != '\0' && curCommand[argsOffset] != '\t')
 		argsOffset++;
 	curCommand[argsOffset++] = '\0';
-	while (curCommand[argsOffset] == ' ')
+	while (curCommand[argsOffset] == ' ' || curCommand[argsOffset]=='\t')
 		argsOffset++;
 	int l = 0;
 	for (int j = argsOffset; j <= k; j++, l++)
@@ -126,7 +125,7 @@ int parseArgsForCommand(char *argsForCommand, char argvs[1024][1024])
 	// printf("%s\n",argsForCommand);
 	for (int i = 0; i < strlen(argsForCommand); i++)
 	{
-		if (argsForCommand[i] != ' ' || argsForCommand[i] == '\0')
+		if (argsForCommand[i] != ' ' || argsForCommand[i] == '\0' && argsForCommand[i] != '\t')
 		{
 			argvs[k][j] = argsForCommand[i], j++;
 		}
@@ -199,7 +198,7 @@ int checkOutRedir(char argvs[1024][1024], int *argc, char output_file[])
 int checkPipe(char argvs[1024][1024], int *argc)
 {
 	int i = 0;
-	int ret=0;
+	int ret = 0;
 	for (; i < *argc; i++)
 	{
 		if (!strcmp(argvs[i], "|"))
@@ -251,34 +250,50 @@ int get_input()
 				}
 			}
 		}
-		scanf("%c", &inp_ch);
+		int val = scanf("%c", &inp_ch);
+		
+		// if (val == EOF)
+		// {
+		// 	inp_ch = '\n';
+		// 	printf("NULL CHARACTER\n");
+		// 	// return ret;
+		// 	int c;
+		// 	while ((c = getchar()) != '\n' && c != EOF)
+		// 	{
+		// 	}
+		// 	// exit(0);
+		// }
+		// break;
 		inp[i++] = inp_ch;
 	}
 	inp[i - 1] = '\0';
 	return ret;
 }
 
-void handler(int x){
+void handler(int x)
+{
 	// printf("\n%d\n",fg_process_pid);
-	if (fg_process_pid) kill(fg_process_pid,x);
+	if (fg_process_pid)
+		kill(fg_process_pid, x);
 }
 
 int main()
 {
-	memset(piddd,-1,400);
+	memset(piddd, -1, 400);
 	getcwd(swd, PATH_MAX);
 	int hist = initializeHistory();
 	char recall_command[1024];
-	signal(SIGINT,handler);
-    signal(SIGQUIT, handler);
-    signal(SIGTSTP, handler);
+	signal(SIGINT, handler);
+	signal(SIGQUIT, handler);
+	signal(SIGTSTP, handler);
 	while (1)
 	{
 		printSystemName();
 		// return 1;
 		int recall = get_input();
-		
-		if (inp[0]==' ' || inp[0]=='\0' ) continue;
+
+		if (inp[0] == ' ' || inp[0] == '\0')
+			continue;
 
 		if (hist)
 			if (recall == 0)
