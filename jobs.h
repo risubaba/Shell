@@ -6,14 +6,13 @@
 #include <signal.h>
 #include <sys/types.h>
 
-
 extern char swd[4096];
 extern int to_int(char *);
 extern char jobs_command[100][4096];
 extern int piddd[100];
-void startJob(char *[1024], int, int);
+void startJob(char * [1024], int, int);
 void printJobs();
 void initializeJobs();
 int endJob(pid_t);
-
+void kjob(char[1024][1024], int);
 extern int pid[100];

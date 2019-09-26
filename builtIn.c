@@ -79,7 +79,7 @@ void Unsetenv(char argvs[1024][1024], int argc)
 }
 
 char commands[][1024] = {
-	"cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob", "jobs", "setenv", "unsetenv", "kjob"};
+	"cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob", "jobs", "setenv", "unsetenv", "kjob", "overkill"};
 
 int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024], int argc)
 {
@@ -136,10 +136,14 @@ int commandtoExecute(int inOffset, char curCommand[1024], char argvs[1024][1024]
 	{
 		Unsetenv(argvs, argc);
 	}
-	// else if (!strcmp(curCommand, commands[13]))
-	// {
-	// 	kjob(argvs, argc);
-	// }
+	else if (!strcmp(curCommand, commands[13]))
+	{
+		kjob(argvs, argc);
+	}
+	else if (!strcmp(curCommand, commands[14]))
+	{
+		overkill();
+	}
 	else
 	{
 		executeCommand(curCommand, argvs, argc);

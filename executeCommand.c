@@ -60,6 +60,7 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 	{
 		setpgid(0, 0);
 		execvp(new_argvs[0], new_argvs);
+		exit(98);
 	}
 	else
 	{

@@ -54,4 +54,48 @@ int endJob(pid_t pidinc)
 		}
 }
 
+void kjob(char argvs[1024][1024],int argc)
+{
+	if (argc!=2)
+	{
+		printf("Invalid number of arguments for kjob");
+		return;
+	}
+	int job_number = to_int(argvs[0]);
+	int signal_number = to_int(argvs[1]);
+	int index = -1,temp_counter;
+	for (int i= 0;i<counter;i++)
+	{
+		if (piddd[i]<=0)
+			continue;
+		temp_counter++;
+		if (temp_counter==job_number)
+		{
+			index=i;
+			break;
+		}
+	}
+	if (index==-1)
+	{
+		printf("Could not find job with given job number\n");
+		return;
+	}
+	if (signal_number==9)
+	{
+		endJob(piddd[index]);
+	}
+	if (kill(piddd[index],signal_number)==-1)
+	{
+		printf("Error in killing job with pid %d",piddd[index]);
+		return;
+	}
+}
 
+void overkill()
+{
+	for (int i=0;i<counter;i++)
+	{
+		if (piddd<=0) continue;
+		kill(piddd[i],9);
+	}
+}
