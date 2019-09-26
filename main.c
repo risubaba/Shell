@@ -233,7 +233,6 @@ int get_input()
 		// printf("%c\n",inp_ch);
 		if (inp_ch == EOF || inp_ch == '\n')
 		{
-			printf("aagaya idhar bc ab kya karu\n");
 			inp[i] = '\0';
 			break;
 			exit(0);
