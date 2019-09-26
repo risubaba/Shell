@@ -17,7 +17,7 @@ char swd[PATH_MAX];
 char ret[PATH_MAX];
 char inp[INP_MAX];
 int piddd[100];
-
+char jobs_command[100][4096];
 //set error messages wherever required
 //add <usage> to error messages
 //try to adjust for ls -l ~/child (Wrong permissions)
@@ -276,6 +276,7 @@ int main()
 	signal(SIGINT, handler);
 	signal(SIGQUIT, handler);
 	signal(SIGTSTP, handler);
+	initializeJobs();
 	while (1)
 	{
 		printSystemName();
