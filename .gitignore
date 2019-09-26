@@ -2,3 +2,4 @@ a.out
 *.o
 .history
 *.txt
+.jobs
