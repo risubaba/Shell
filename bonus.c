@@ -252,15 +252,16 @@ char commandsBuiltIn[][1024] = {
 
 int checkBuiltIn(char cronCommand[1024])
 {
-    int i=0;
+    int i = 0;
     i++;
     int len = 0;
-    while (strlen(commandsBuiltIn[len])!=0) len++;
-    while (strcmp(commandsBuiltIn[i],cronCommand) && i<len)
+    while (strlen(commandsBuiltIn[len]) != 0)
+        len++;
+    while (strcmp(commandsBuiltIn[i], cronCommand) && i < len)
     {
         i++;
     }
-    if (i==len)
+    if (i == len)
         return 1;
     return 0;
 }
@@ -295,11 +296,8 @@ void cronjob(char argvs[1024][1024], int argc)
     {
         strcpy(temp_argvs[j], "&");
         j++;
-        temp_argc = j;
     }
-    // printf("%d\n", temp_argc);
-    // for (int k = 0; k < j; k++)
-    //     printf("%s\n", temp_argvs[k]);
+    temp_argc = j;
     if (i == argc - 1)
     {
         printf("Please enter a valid argument\n");
@@ -320,8 +318,6 @@ void cronjob(char argvs[1024][1024], int argc)
     int repititions = total_time / interval;
     time_t starttime = time(NULL), prevtime = time(NULL);
     pid_t pid = fork();
-    // int arr[100];
-    // int i=0;
     if (pid == 0)
     {
         while (1 && repititions)

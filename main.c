@@ -101,13 +101,13 @@ int parseInput(char *curCommand, char *argsForCommand)
 {
 	int inOffset = 0, k = strlen(curCommand);
 
-	while (curCommand[inOffset] == ' ' || curCommand[inOffset]=='\t')
+	while (curCommand[inOffset] == ' ' || curCommand[inOffset] == '\t')
 		inOffset++;
 	int argsOffset = inOffset;
 	while (curCommand[argsOffset] != ' ' && curCommand[argsOffset] != '\0' && curCommand[argsOffset] != '\t')
 		argsOffset++;
 	curCommand[argsOffset++] = '\0';
-	while (curCommand[argsOffset] == ' ' || curCommand[argsOffset]=='\t')
+	while (curCommand[argsOffset] == ' ' || curCommand[argsOffset] == '\t')
 		argsOffset++;
 	int l = 0;
 	for (int j = argsOffset; j <= k; j++, l++)
@@ -228,45 +228,35 @@ int get_input()
 	char inp_ch = '\0';
 	int i = 0, ret = 0;
 	int last_car = 0;
-	while (inp_ch != '\n')
+	while (inp_ch = getchar())
 	{
-		if (inp_ch == '\033')
-			last_car = i;
-		if (inp_ch == 'A')
+		// printf("%c\n",inp_ch);
+		if (inp_ch == EOF || inp_ch == '\n')
 		{
-			if (i - last_car == 2)
+			printf("aagaya idhar bc ab kya karu\n");
+			inp[i] = '\0';
+			break;
+			exit(0);
+		}
+		else if (inp_ch == '\033')
+		{
+			inp_ch = getchar();
+			inp_ch = getchar();
+			if (inp_ch == 'A')
+				ret++;
+			else
 			{
-				if (i > 3 && ret)
-					ret++;
-				else if (i == 3)
-					ret++;
-				else
-				{
-					ret = -1;
-					inp[0] = '\n';
-					while ((getchar()) != '\n')
-						; // to flush something
-					return ret;
-				}
+				ret = -1;
+				break;
 			}
 		}
-		int val = scanf("%c", &inp_ch);
-		
-		// if (val == EOF)
-		// {
-		// 	inp_ch = '\n';
-		// 	printf("NULL CHARACTER\n");
-		// 	// return ret;
-		// 	int c;
-		// 	while ((c = getchar()) != '\n' && c != EOF)
-		// 	{
-		// 	}
-		// 	// exit(0);
-		// }
-		// break;
-		inp[i++] = inp_ch;
+		else
+		{
+			inp[i] = inp_ch;
+		}
+		i++;
 	}
-	inp[i - 1] = '\0';
+	inp[i] = '\0';
 	return ret;
 }
 
@@ -291,6 +281,7 @@ int main()
 		printSystemName();
 		// return 1;
 		int recall = get_input();
+		// printf("%s\n",inp);
 
 		if (inp[0] == ' ' || inp[0] == '\0')
 			continue;
