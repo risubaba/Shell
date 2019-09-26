@@ -20,7 +20,7 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 
 	int background = 0;
 	if (!strcmp(new_argvs[argc],"&") && strlen(new_argvs[argc]) == 1)
-		background = 1;
+		background = 1,new_argvs[argc]='\0';
 
 	if (background)
 		signal(SIGCHLD, process_handler);

@@ -19,4 +19,5 @@ void nightswatch_interrupt_setup();
 void nightswatch_interrupt();
 void nightswatch(char[1024][1024], int);
 void cronjob(char[1024][1024], int);
+int checkBuiltIn(char [1024]);
 extern int commandtoExecute(int,char[1024],char[1024][1024],int);

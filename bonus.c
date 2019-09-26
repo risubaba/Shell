@@ -247,6 +247,24 @@ void nightswatch(char argvs[1024][1024], int argc)
     }
 }
 
+char commandsBuiltIn[][1024] = {
+    "cd", "pwd", "echo", "ls", "pinfo", "history", "nightswatch", "clear", "quit", "cronjob", "jobs", "setenv", "unsetenv", "kjob"};
+
+int checkBuiltIn(char cronCommand[1024])
+{
+    int i=0;
+    i++;
+    int len = 0;
+    while (strlen(commandsBuiltIn[len])!=0) len++;
+    while (strcmp(commandsBuiltIn[i],cronCommand) && i<len)
+    {
+        i++;
+    }
+    if (i==len)
+        return 1;
+    return 0;
+}
+
 void cronjob(char argvs[1024][1024], int argc)
 {
     // cronjob -c ls -t 3 -p 6
@@ -273,12 +291,20 @@ void cronjob(char argvs[1024][1024], int argc)
             break;
         }
     }
+    if (checkBuiltIn(temp_curCommand))
+    {
+        strcpy(temp_argvs[j], "&");
+        j++;
+        temp_argc = j;
+    }
+    // printf("%d\n", temp_argc);
+    // for (int k = 0; k < j; k++)
+    //     printf("%s\n", temp_argvs[k]);
     if (i == argc - 1)
     {
         printf("Please enter a valid argument\n");
         return;
     }
-    temp_argc = j;
     int interval = to_int(argvs[i + 1]);
     if (interval < 1)
     {
@@ -306,7 +332,6 @@ void cronjob(char argvs[1024][1024], int argc)
                 prevtime = curtime;
                 commandtoExecute(0, temp_curCommand, temp_argvs, temp_argc);
                 repititions--;
-
             }
         }
         exit(0);
