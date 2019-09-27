@@ -81,8 +81,11 @@ void adjustForTilda(char *argsForCommand)
 	{
 		if (argsForCommand[0] == '/')
 			return;
-		for (int i = 0; i < strlen(argsForCommand); i++)
-			argsForCommand[i + strlen(cwd) + 1] = argsForCommand[i];
+		int len = strlen(argsForCommand);
+		for (int i = 0; i < len; i++)
+		{
+			argsForCommand[i + strlen(cwd) + 1] = argsForCommand[i];			// exit(0);
+		}
 		argsForCommand[strlen(cwd)] = '/';
 		for (int i = 0; i < strlen(cwd); i++)
 			argsForCommand[i] = cwd[i];
@@ -90,7 +93,9 @@ void adjustForTilda(char *argsForCommand)
 	}
 	else
 	{
-		for (int i = 0; i < strlen(argsForCommand); i++)
+		int len = strlen(argsForCommand);
+
+		for (int i = 0; i < len; i++)
 			argsForCommand[i + strlen(swd)] = argsForCommand[i + 1];
 		for (int i = 0; i < strlen(swd); i++)
 			argsForCommand[i] = swd[i];

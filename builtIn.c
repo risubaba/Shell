@@ -37,6 +37,7 @@ void shell_exit()
 	char ex = getchar();
 	if (ex == 'y' || ex == 'Y')
 	{
+		overkill();
 		exit(0);
 	}
 }

@@ -52,7 +52,7 @@ void printJobs()
 int endJob(pid_t pidinc)
 {
 	for (int i = 0; i < counter; i++)
-		if (piddd[i] = pidinc)
+		if (piddd[i] == pidinc)
 		{
 			piddd[i] = -pidinc;
 			return i;
@@ -63,10 +63,10 @@ void kjob(char argvs[1024][1024], int argc)
 {
 	if (argc != 2)
 	{
-		printf("Invalid number of arguments for kjob");
+		printf("Invalid number of arguments for kjob\n");
 		return;
 	}
-	int index = -1, temp_counter;
+	int index = -1, temp_counter = 0;
 	int job_number = to_int(argvs[0]);
 	int signal_number = to_int(argvs[1]);
 	if (job_number < 0 || signal_number < 0)
@@ -76,6 +76,7 @@ void kjob(char argvs[1024][1024], int argc)
 	}
 	for (int i = 0; i < counter; i++)
 	{
+		printf("%d\n",piddd[i]);
 		if (piddd[i] <= 0)
 			continue;
 		temp_counter++;
@@ -90,13 +91,14 @@ void kjob(char argvs[1024][1024], int argc)
 		printf("Could not find job with given job number\n");
 		return;
 	}
+	int pid_current = piddd[index];
 	if (signal_number == 9)
 	{
-		endJob(piddd[index]);
+		endJob(pid_current);
 	}
-	if (kill(piddd[index], signal_number) == -1)
+	if (kill(pid_current, signal_number) == -1)
 	{
-		printf("Error in killing job with pid %d", piddd[index]);
+		printf("Error in killing job with pid %d\n", piddd[index]);
 		return;
 	}
 }
@@ -177,7 +179,7 @@ void bg(char argvs[1024][1024], int argc)
 		printf("Could not find job with given job number\n");
 		return;
 	}
-	kill(piddd[index],SIGCONT);
+	kill(piddd[index], SIGCONT);
 }
 
 void overkill()

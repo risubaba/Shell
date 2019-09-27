@@ -59,7 +59,11 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 	else if (pid == 0)
 	{
 		setpgid(0, 0);
-		execvp(new_argvs[0], new_argvs);
+
+		if (execvp(new_argvs[0], new_argvs)<0)
+		{
+			printf("Error in executing command\n");
+		}
 		exit(98);
 	}
 	else

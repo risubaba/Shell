@@ -330,6 +330,8 @@ void cronjob(char argvs[1024][1024], int argc)
                 repititions--;
             }
         }
+        sleep(5);
+        overkill();
         exit(0);
     }
 }

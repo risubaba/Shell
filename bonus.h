@@ -10,6 +10,7 @@
 extern int to_int(char *);
 extern char swd[4096];
 extern char inp[INP_MAX];
+extern void overkill();
 int initializeHistory();
 void addHistory(char *);
 char *recall_history(int);
