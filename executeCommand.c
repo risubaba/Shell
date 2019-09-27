@@ -20,13 +20,6 @@ void process_handler(int sig)
 			}
 		}
 	}
-	if (WIFSIGNALED(status) && pid != -1)
-	{
-		if (temp > -1)
-		{
-			fprintf(stderr, "\n%s with pid %d terminated due to the signal %d", jobs_command[temp], -piddd[temp], WTERMSIG(status));
-		}
-	}
 }
 
 void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
@@ -74,11 +67,18 @@ void executeCommand(char *curCommand, char argvs[1024][1024], int argc)
 		{
 			fg_process_pid = pid;
 			int status;
+			signal(SIGTTIN, SIG_IGN);
+			signal(SIGTTOU, SIG_IGN);
+			tcsetpgrp(STDIN_FILENO,pid);
 			waitpid(pid, &status, WUNTRACED);
 			if (WIFSTOPPED(status))
 			{
 				startJob(new_argvs, argc, pid);
 			}
+			signal(SIGTTIN, SIG_IGN);
+			signal(SIGTTOU, SIG_IGN);
+			tcsetpgrp(STDIN_FILENO,getpgrp());
+
 			fg_process_pid = 0;
 			signal(SIGCHLD, process_handler);
 		}

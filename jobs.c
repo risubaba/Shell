@@ -76,7 +76,6 @@ void kjob(char argvs[1024][1024], int argc)
 	}
 	for (int i = 0; i < counter; i++)
 	{
-		printf("%d\n",piddd[i]);
 		if (piddd[i] <= 0)
 			continue;
 		temp_counter++;
@@ -138,7 +137,15 @@ void fg(char argvs[1024][1024], int argc)
 	fg_process_pid = piddd[index];
 	endJob(piddd[index]);
 	int status;
+	signal(SIGTTIN, SIG_IGN);
+	signal(SIGTTOU, SIG_IGN);
+	tcsetpgrp(STDIN_FILENO, piddd[index]);
+
 	waitpid(piddd[index], &status, WUNTRACED);
+	signal(SIGTTIN, SIG_IGN);
+	signal(SIGTTOU, SIG_IGN);
+	tcsetpgrp(STDIN_FILENO, getpgrp());
+
 	fg_process_pid = 0;
 	if (WIFSTOPPED(status))
 	{
