@@ -135,7 +135,6 @@ void fg(char argvs[1024][1024], int argc)
 	signal(SIGCHLD, SIG_IGN);
 	kill(piddd[index], SIGCONT);
 	fg_process_pid = piddd[index];
-	endJob(piddd[index]);
 	int status;
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN);
@@ -169,7 +168,7 @@ void bg(char argvs[1024][1024], int argc)
 		printf("Job Number has to be positive\n");
 		return;
 	}
-	int index = -1, temp_counter;
+	int index = -1, temp_counter = 0;
 	for (int i = 0; i < counter; i++)
 	{
 		if (piddd[i] <= 0)
